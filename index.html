@@ -1,0 +1,2221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reweft: Circular Textile Exchange (Prototype)</title>
+<meta name="description" content="Prototype B2B exchange where textile companies list deadstock, state what they need, and join 2, 3 and 4-way circular exchanges. Fictional demo data.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='11' fill='none' stroke='%231f4d3a' stroke-width='4'/%3E%3Cpath d='M16 5a11 11 0 0 1 9.5 16.5' fill='none' stroke='%23b0603a' stroke-width='4'/%3E%3C/svg%3E">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f6f4ef; --panel: #fffefb; --panel-2: #f1eee7; --line: #e5e1d7; --line-2: #d6d1c4;
+  --ink: #191a17; --ink-2: #55564f; --ink-3: #7c7c72;
+  --brand: #1f4d3a; --brand-2: #2f6b52; --brand-soft: #e4ede7; --clay: #b0603a; --clay-soft: #f6e8df;
+  --ok: #1f7a4d; --ok-soft: #e2f1e8; --warn: #9a6a0c; --warn-soft: #f8efd9; --bad: #a93a32; --bad-soft: #f8e5e2;
+  --radius: 14px; --radius-s: 9px;
+  --shadow: 0 1px 2px rgba(25,26,23,.05), 0 6px 22px rgba(25,26,23,.05);
+  --shadow-l: 0 12px 44px rgba(25,26,23,.18);
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --serif: "New York", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 14.5px/1.5 var(--sans); -webkit-font-smoothing: antialiased; }
+h1, h2, h3, h4, p { margin: 0; }
+h1 { font: 500 30px/1.15 var(--serif); letter-spacing: -.01em; text-wrap: balance; }
+h2 { font: 500 21px/1.2 var(--serif); letter-spacing: -.005em; }
+h3 { font-size: 15px; font-weight: 620; line-height: 1.3; }
+h4 { font-size: 12px; font-weight: 600; color: var(--ink-3); letter-spacing: .04em; text-transform: uppercase; }
+a { color: var(--brand); }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--brand-2); outline-offset: 2px; border-radius: 4px; }
+.muted { color: var(--ink-2); } .faint { color: var(--ink-3); } .small { font-size: 12.5px; } .num { font-variant-numeric: tabular-nums; }
+
+/* Shell */
+.app { display: grid; grid-template-columns: 244px minmax(0, 1fr); min-height: 100vh; }
+.side { background: var(--panel); border-right: 1px solid var(--line); padding: 20px 14px; display: flex; flex-direction: column; gap: 18px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+.brand { display: flex; align-items: center; gap: 10px; padding: 0 6px; }
+.brand b { font: 500 20px/1 var(--serif); letter-spacing: -.01em; }
+.brand-mark { width: 26px; height: 26px; flex: none; }
+.switcher { border: 1px solid var(--line); border-radius: var(--radius-s); padding: 8px 10px; background: var(--bg); }
+.switcher label { display: block; font-size: 11px; color: var(--ink-3); letter-spacing: .04em; text-transform: uppercase; margin-bottom: 2px; }
+.switcher select { width: 100%; border: 0; background: none; font-weight: 600; padding: 2px 0; cursor: pointer; }
+.nav { display: flex; flex-direction: column; gap: 2px; }
+.nav button { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; padding: 8px 10px; border: 0; border-radius: 8px; background: none; cursor: pointer; color: var(--ink-2); text-align: left; font-size: 14px; }
+.nav button:hover { background: var(--panel-2); color: var(--ink); }
+.nav button[aria-current="page"] { background: var(--brand); color: #fff; font-weight: 550; }
+.nav .count { font-size: 11.5px; font-weight: 600; min-width: 20px; text-align: center; padding: 0 6px; border-radius: 99px; background: var(--brand-soft); color: var(--brand); }
+.nav button[aria-current="page"] .count { background: rgba(255,255,255,.2); color: #fff; }
+.nav-sep { height: 1px; background: var(--line); margin: 8px 6px; }
+.side-foot { margin-top: auto; font-size: 11.5px; color: var(--ink-3); line-height: 1.45; padding: 0 6px; }
+.side-foot button:not(.btn) { background: none; border: 0; padding: 0; color: var(--ink-2); text-decoration: underline; cursor: pointer; font-size: 11.5px; }
+main { min-width: 0; padding: 28px 36px 80px; max-width: 1280px; }
+.banner { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; background: var(--panel-2); border-bottom: 1px solid var(--line); padding: 7px 36px; font-size: 12.5px; color: var(--ink-2); }
+.page-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+.page-head p { color: var(--ink-2); margin-top: 5px; max-width: 66ch; }
+
+/* Buttons and inputs */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 14px; border-radius: 9px; border: 1px solid var(--line-2); background: var(--panel); cursor: pointer; font-weight: 550; font-size: 13.5px; white-space: nowrap; }
+.btn:hover { background: var(--panel-2); }
+.btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+.btn.primary:hover { background: var(--brand-2); border-color: var(--brand-2); }
+.btn.danger { color: var(--bad); border-color: #e4c3bf; }
+.btn.danger:hover { background: var(--bad-soft); }
+.btn.ghost { border-color: transparent; background: none; color: var(--ink-2); padding: 6px 8px; }
+.btn.ghost:hover { background: var(--panel-2); color: var(--ink); }
+.btn.sm { padding: 5px 10px; font-size: 12.5px; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.between { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+input[type="text"], input[type="search"], input[type="number"], select, textarea { width: 100%; padding: 8px 10px; background: var(--panel); border: 1px solid var(--line-2); border-radius: 8px; font-size: 13.5px; }
+textarea { min-height: 62px; resize: vertical; }
+.field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.field > label, .field > .lab { font-size: 12.5px; font-weight: 550; color: var(--ink-2); }
+.field .hint { font-size: 11.5px; color: var(--ink-3); }
+.field .err { font-size: 12px; color: var(--bad); font-weight: 550; }
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }
+.form-grid .full { grid-column: 1 / -1; }
+.chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.chip { border: 1px solid var(--line-2); background: var(--panel); border-radius: 99px; padding: 3px 10px; font-size: 12.5px; cursor: pointer; color: var(--ink-2); }
+.chip:hover { border-color: var(--ink-3); }
+.chip[aria-pressed="true"] { background: var(--brand); border-color: var(--brand); color: #fff; }
+.seg { display: inline-flex; background: var(--panel-2); border-radius: 9px; padding: 3px; gap: 2px; flex-wrap: wrap; }
+.seg button { border: 0; background: none; padding: 5px 12px; border-radius: 7px; cursor: pointer; color: var(--ink-2); font-size: 13px; font-weight: 550; }
+.seg button[aria-pressed="true"] { background: var(--panel); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+
+/* Pills */
+.pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: 99px; background: var(--panel-2); color: var(--ink-2); white-space: nowrap; }
+.pill.ok { background: var(--ok-soft); color: var(--ok); } .pill.warn { background: var(--warn-soft); color: var(--warn); } .pill.bad { background: var(--bad-soft); color: var(--bad); }
+.pill.brand { background: var(--brand-soft); color: var(--brand); } .pill.clay { background: var(--clay-soft); color: var(--clay); }
+.pill.sim { background: none; border: 1px dashed var(--line-2); color: var(--ink-2); }
+
+/* Cards */
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); min-width: 0; }
+.card.flat { box-shadow: none; }
+.card > h2, .card > h3 { margin-bottom: 4px; }
+.stack { display: flex; flex-direction: column; gap: 16px; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.grid-main { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(280px, 1fr); gap: 16px; align-items: start; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+.stat { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; }
+.stat .lab { font-size: 12.5px; color: var(--ink-2); }
+.stat .val { font: 500 27px/1.2 var(--serif); margin-top: 3px; }
+.stat .sub { font-size: 12px; color: var(--ink-3); margin-top: 2px; }
+
+/* Textile cards */
+.lot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(238px, 1fr)); gap: 16px; }
+.lot { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; box-shadow: var(--shadow); transition: transform .15s, box-shadow .15s; min-width: 0; }
+.lot:hover { transform: translateY(-2px); box-shadow: var(--shadow-l); }
+.swatch { position: relative; background-size: cover; background-position: center; }
+.lot .swatch { height: 148px; }
+.swatch .tagline { position: absolute; left: 8px; bottom: 8px; background: rgba(255,254,251,.9); color: var(--ink-2); font-size: 10.5px; padding: 1px 6px; border-radius: 4px; }
+.swatch .corner { position: absolute; right: 8px; top: 8px; display: flex; gap: 4px; }
+.lot-body { padding: 12px 14px 13px; display: flex; flex-direction: column; gap: 7px; flex: 1; }
+.lot-title { font-weight: 620; font-size: 14.5px; line-height: 1.3; }
+.spec { display: grid; grid-template-columns: 1fr 1fr; gap: 1px 10px; font-size: 12.5px; color: var(--ink-2); }
+.lot-foot { margin-top: auto; padding-top: 8px; display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-wrap: wrap; }
+.dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; border: 1px solid rgba(0,0,0,.15); flex: none; }
+.mono { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; color: #fff; font-size: 11px; font-weight: 650; flex: none; letter-spacing: .02em; }
+.mono.sm { width: 22px; height: 22px; font-size: 9px; }
+.who { display: flex; align-items: center; gap: 8px; min-width: 0; }
+
+/* Exchange cards */
+.ex { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px 18px; display: grid; grid-template-columns: minmax(0, 1fr) 190px; gap: 16px; cursor: pointer; transition: border-color .15s; text-align: left; width: 100%; }
+.ex:hover { border-color: var(--brand-2); }
+.chain { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 10px 0 0; }
+.chain .hop { display: flex; align-items: center; gap: 7px; background: var(--bg); border-radius: 9px; padding: 5px 9px 5px 5px; min-width: 0; font-size: 12.5px; }
+.chain .sw { width: 30px; height: 30px; border-radius: 6px; background-size: cover; flex: none; }
+.chain .arrow { color: var(--ink-3); }
+.ex-side { border-left: 1px solid var(--line); padding-left: 16px; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+.gain { font: 500 22px/1.2 var(--serif); }
+.give-get { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.give-get > div { background: var(--bg); border-radius: 10px; padding: 8px; display: flex; gap: 9px; align-items: center; min-width: 0; }
+.give-get .sw { width: 42px; height: 42px; border-radius: 7px; flex: none; background-size: cover; }
+
+/* Graph */
+.graph { width: 100%; min-height: 200px; }
+.graph svg { display: block; width: 100%; height: auto; }
+.flow-step { display: grid; grid-template-columns: 54px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 11px 0; border-top: 1px solid var(--line); }
+.flow-step:first-child { border-top: 0; }
+.flow-step .sw { width: 54px; height: 54px; border-radius: 9px; background-size: cover; }
+
+/* Tables */
+.tw { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; background: var(--panel); }
+th { text-align: left; font-size: 11.5px; font-weight: 600; color: var(--ink-3); padding: 8px 11px; background: var(--bg); vertical-align: bottom; }
+td { padding: 8px 11px; border-top: 1px solid var(--line); vertical-align: top; }
+td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pos { color: var(--ok); font-weight: 600; } .neg { color: var(--bad); font-weight: 600; }
+
+/* Notes */
+.note { background: var(--bg); border-radius: 10px; padding: 10px 13px; font-size: 13px; color: var(--ink-2); }
+.note b { color: var(--ink); }
+.note.warn { background: var(--warn-soft); } .note.clay { background: var(--clay-soft); } .note.ok { background: var(--ok-soft); }
+.check { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 7px; font-size: 13px; padding: 3px 0; }
+.tick { width: 16px; height: 16px; border-radius: 50%; display: inline-grid; place-items: center; font-size: 10px; color: #fff; margin-top: 2px; }
+.tick.y { background: var(--ok); } .tick.n { background: var(--bad); } .tick.w { background: var(--line-2); color: var(--ink-2); }
+.timeline { display: flex; gap: 0; flex-wrap: wrap; margin: 6px 0; }
+.tl { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--ink-3); padding-right: 12px; }
+.tl i { width: 9px; height: 9px; border-radius: 50%; background: var(--line-2); display: inline-block; }
+.tl.done { color: var(--ink); } .tl.done i { background: var(--brand); }
+.bars { display: flex; flex-direction: column; gap: 9px; }
+.bar-row { display: grid; grid-template-columns: 112px minmax(0, 1fr) 62px; align-items: center; gap: 10px; font-size: 13px; }
+.bar-track { height: 10px; background: var(--panel-2); border-radius: 5px; overflow: hidden; }
+.bar-fill { height: 100%; background: var(--brand); border-radius: 5px; transition: width .35s; }
+
+/* Empty */
+.empty { text-align: center; padding: 34px 20px; border: 1px dashed var(--line-2); border-radius: var(--radius); color: var(--ink-2); }
+.empty h3 { margin-bottom: 5px; color: var(--ink); }
+
+/* Drawer, toast, tour */
+.scrim { position: fixed; inset: 0; background: rgba(25,26,23,.32); z-index: 40; }
+.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(560px, 100vw); background: var(--panel); z-index: 41; box-shadow: var(--shadow-l); display: flex; flex-direction: column; }
+.drawer header { padding: 16px 20px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+.drawer .body { padding: 18px 20px; overflow-y: auto; flex: 1; }
+.drawer footer { padding: 12px 20px; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: 22px; background: var(--ink); color: #fff; padding: 9px 16px; border-radius: 10px; font-size: 13px; z-index: 60; box-shadow: var(--shadow-l); max-width: min(560px, 90vw); }
+.tour { position: fixed; right: 22px; bottom: 22px; width: min(370px, calc(100vw - 32px)); background: var(--ink); color: #f6f4ef; border-radius: var(--radius); padding: 16px 18px; z-index: 50; box-shadow: var(--shadow-l); }
+.tour h3 { font: 500 18px/1.25 var(--serif); margin: 4px 0 6px; }
+.tour p { font-size: 13.5px; color: #d9d6cc; }
+.tour .bar { height: 3px; background: rgba(255,255,255,.18); border-radius: 2px; margin-bottom: 10px; overflow: hidden; }
+.tour .bar i { display: block; height: 100%; background: #9fd0b5; }
+.tour .btn { background: #f6f4ef; color: var(--ink); border-color: #f6f4ef; }
+.tour .btn.ghost { background: none; color: #d9d6cc; border-color: transparent; }
+.tour-target { outline: 2px solid var(--clay); outline-offset: 4px; border-radius: 10px; }
+.photo-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.photo { position: relative; width: 74px; height: 74px; border-radius: 8px; background-size: cover; background-position: center; border: 1px solid var(--line); }
+.photo button { position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; border-radius: 50%; border: 0; background: var(--ink); color: #fff; font-size: 11px; cursor: pointer; line-height: 1; }
+details summary { cursor: pointer; font-weight: 550; font-size: 13px; color: var(--ink-2); }
+details[open] summary { margin-bottom: 8px; }
+.hero { background: linear-gradient(135deg, #1f4d3a, #17392b); color: #f6f4ef; border-radius: var(--radius); padding: 22px 24px; display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 20px; align-items: center; box-shadow: var(--shadow); }
+.hero h2 { color: #fff; font-size: 24px; margin: 6px 0; }
+.hero p { color: #d6e2da; font-size: 14px; }
+.hero .btn { background: #f6f4ef; color: var(--brand); border-color: #f6f4ef; }
+.hero .btn.outline { background: none; color: #f6f4ef; border-color: rgba(255,255,255,.4); }
+.hero .pill { background: rgba(255,255,255,.14); color: #f6f4ef; }
+.hero .graph text { fill: #f6f4ef; }
+
+@media (max-width: 1040px) { .grid-main, .hero { grid-template-columns: minmax(0, 1fr); } .hero .graph { max-width: 340px; } }
+@media (max-width: 820px) {
+  .app { display: block; }
+  .side { position: sticky; top: 0; z-index: 30; height: auto; flex-direction: column; gap: 8px; padding: 10px 14px; border-right: 0; border-bottom: 1px solid var(--line); overflow: visible; }
+  .side-top { display: flex; gap: 10px; align-items: center; }
+  .brand { padding: 0; } .brand b { font-size: 18px; }
+  .switcher { flex: 1; min-width: 0; padding: 3px 8px; } .switcher label { display: none; }
+  .nav { flex-direction: row; overflow-x: auto; gap: 2px; scrollbar-width: none; margin: 0 -14px; padding: 0 14px; }
+  .nav button { width: auto; white-space: nowrap; padding: 6px 10px; font-size: 13px; }
+  .nav-sep, .side-foot { display: none; }
+  main { padding: 18px 16px 90px; } .banner { padding: 6px 16px; }
+  h1 { font-size: 25px; }
+  .grid2, .form-grid { grid-template-columns: minmax(0, 1fr); }
+  .ex { grid-template-columns: minmax(0, 1fr); } .ex-side { border-left: 0; border-top: 1px solid var(--line); padding: 10px 0 0; }
+  .give-get { grid-template-columns: minmax(0, 1fr); }
+  .tour { right: 16px; bottom: 16px; }
+  .flow-step { grid-template-columns: 44px minmax(0, 1fr); } .flow-step .sw { width: 44px; height: 44px; } .flow-step .end { grid-column: 2; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side" id="side"></aside>
+  <div style="min-width:0">
+    <div class="banner"><span><b style="font-weight:600;color:var(--ink)">Prototype.</b> Fictional companies and simulated exchanges. No real transactions, shipments, payments or company verification.</span></div>
+    <main id="main" tabindex="-1"><div id="page"></div></main>
+  </div>
+</div>
+<div id="overlay"></div>
+<div id="tour"></div>
+<div id="toast" class="toast" role="status" hidden></div>
+<noscript><p style="padding:20px">This prototype runs its matching in JavaScript. Please enable JavaScript.</p></noscript>
+<script>
+/*
+ * solver.js - optimisers replacing the SciPy calls in swap_sim.py.
+ *
+ * solvePacking  replaces scipy.optimize.milp (HiGHS) and solves the same integer
+ *               program: max sum w_c x_c, s.t. each firm is in at most one chosen
+ *               cycle. Method: connected components, then branch and bound with a
+ *               Lagrangian upper bound (firm prices u_i >= 0):
+ *                   L(u) = sum_i u_i + sum_c max(0, w_c - sum_{i in c} u_i)
+ *               If the time limit is reached the incumbent is returned and flagged
+ *               as not proven optimal, with its upper bound.
+ *
+ * linearSumAssignment  replaces scipy.optimize.linear_sum_assignment
+ *               (shortest augmenting paths, O(n^3), minimum total cost).
+ */
+(globalThis.KX_MODULES = globalThis.KX_MODULES || []).push(function solverModule(KX) {
+  "use strict";
+
+  const EPS = 1e-9;
+
+  function solveComponent(cycles, nFirms, deadline, stats) {
+    const m = cycles.length;
+    const w = new Float64Array(m);
+    const members = new Array(m);
+    for (let c = 0; c < m; c++) { w[c] = cycles[c].w; members[c] = cycles[c].nodes; }
+    const firmCycles = Array.from({ length: nFirms }, () => []);
+    for (let c = 0; c < m; c++) for (const f of members[c]) firmCycles[f].push(c);
+
+    let incumbent = [], incumbentValue = 0;
+    const dead = new Int32Array(m);    // >0: excluded at the current search node
+    const used = new Uint8Array(nFirms);
+    const rc = new Float64Array(m);
+
+    const consider = (picks, value) => {
+      if (value > incumbentValue + EPS) { incumbentValue = value; incumbent = picks.slice(); }
+    };
+
+    /** Lagrangian value over alive cycles and free firms; fills rc and the subgradient. */
+    function evalL(u, g) {
+      let L = 0;
+      for (let f = 0; f < nFirms; f++) {
+        g[f] = 1;
+        if (!used[f]) L += u[f];
+      }
+      for (let c = 0; c < m; c++) {
+        if (dead[c]) continue;
+        const nodes = members[c];
+        let r = w[c];
+        for (let k = 0; k < nodes.length; k++) r -= u[nodes[k]];
+        rc[c] = r;
+        if (r > 0) {
+          L += r;
+          for (let k = 0; k < nodes.length; k++) g[nodes[k]] -= 1;
+        }
+      }
+      return L;
+    }
+
+    /** Subgradient steps on prices; keeps the lowest bound (any u >= 0 is valid). */
+    function improve(u, iters, value, thetaStart) {
+      const g = new Float64Array(nFirms), bestU = Float64Array.from(u);
+      let bestL = Infinity, theta = thetaStart, stall = 0;
+      for (let it = 0; it < iters; it++) {
+        const L = evalL(u, g);
+        if (L < bestL - 1e-12) { bestL = L; bestU.set(u); stall = 0; }
+        else if (++stall >= 12) { theta *= 0.5; stall = 0; }
+        const target = Math.max(incumbentValue - value, 0);
+        if (bestL <= target + EPS) break;
+        let norm = 0;
+        for (let f = 0; f < nFirms; f++) if (!used[f]) {
+          const dir = u[f] > 0 || g[f] < 0 ? g[f] : 0;
+          norm += dir * dir;
+        }
+        if (norm < 1e-12) break;
+        const t = (theta * Math.max(L - target, 1e-9)) / norm;
+        for (let f = 0; f < nFirms; f++) if (!used[f]) u[f] = Math.max(0, u[f] - t * g[f]);
+      }
+      const finalL = evalL(bestU, g); // leave rc consistent with the returned prices
+      u.set(bestU);
+      return Math.min(bestL, finalL);
+    }
+
+    /** Greedy primal heuristic: alive cycles by reduced cost, then by weight. */
+    function primal(u, base, value) {
+      const order = [];
+      for (let c = 0; c < m; c++) if (!dead[c]) order.push(c);
+      order.sort((a, b) => rc[b] - rc[a] || w[b] - w[a]);
+      const taken = new Uint8Array(nFirms);
+      const picks = base.slice();
+      let val = value;
+      for (const c of order) {
+        const nodes = members[c];
+        let free = true;
+        for (let k = 0; k < nodes.length; k++) if (taken[nodes[k]]) { free = false; break; }
+        if (!free) continue;
+        for (let k = 0; k < nodes.length; k++) taken[nodes[k]] = 1;
+        picks.push(c);
+        val += w[c];
+      }
+      consider(picks, val);
+    }
+
+    // Root: tighten prices and reduced-cost-fix cycles that cannot be in any better solution.
+    const u0 = new Float64Array(nFirms);
+    for (let c = 0; c < m; c++) {
+      const share = w[c] / members[c].length;
+      for (const f of members[c]) if (share > u0[f]) u0[f] = share;
+    }
+    const rootIters = m > 4000 ? 150 : 400;
+    evalL(u0, new Float64Array(nFirms));
+    primal(u0, [], 0);
+    const rootUB = improve(u0, rootIters, 0, 1.5);
+    primal(u0, [], 0);
+    for (let c = 0; c < m; c++) if (rc[c] < 0 && rootUB + rc[c] < incumbentValue - EPS) dead[c] = 1;
+
+    const nodeIters = m > 4000 ? 1 : m > 800 ? 4 : 10;
+    const chosen = [];
+    let timedOut = false, nodes = 0;
+
+    const removeFirm = (f, delta) => {
+      used[f] = delta > 0 ? 1 : 0;
+      const list = firmCycles[f];
+      for (let i = 0; i < list.length; i++) dead[list[i]] += delta;
+    };
+
+    function dfs(value, parentU) {
+      if (timedOut) return;
+      if ((++nodes & 63) === 0 && Date.now() > deadline) { timedOut = true; return; }
+      consider(chosen, value);
+
+      const u = Float64Array.from(parentU);
+      let anyAlive = false;
+      for (let c = 0; c < m; c++) if (!dead[c]) { anyAlive = true; break; }
+      if (!anyAlive) return;
+      // Firms with no alive cycle carry no value at this node.
+      const liveFirm = new Uint8Array(nFirms);
+      for (let c = 0; c < m; c++) if (!dead[c]) for (const f of members[c]) liveFirm[f] = 1;
+      const released = [];
+      for (let f = 0; f < nFirms; f++) if (!used[f] && !liveFirm[f]) { used[f] = 1; released.push(f); u[f] = 0; }
+
+      const bound = improve(u, nodeIters, value, 0.8);
+      const undo = () => { for (const f of released) used[f] = 0; };
+      if (value + bound <= incumbentValue + EPS) { undo(); return; }
+      if ((nodes & 7) === 1) primal(u, chosen, value);
+
+      // Branch on the firm where the relaxation is most in conflict.
+      const conflict = new Int32Array(nFirms);
+      for (let c = 0; c < m; c++) if (!dead[c] && rc[c] > 0) for (const f of members[c]) conflict[f]++;
+      let branch = -1, bc = -1, bp = -1;
+      for (let f = 0; f < nFirms; f++) {
+        if (used[f]) continue;
+        if (conflict[f] > bc || (conflict[f] === bc && u[f] > bp)) { branch = f; bc = conflict[f]; bp = u[f]; }
+      }
+      if (branch < 0) { undo(); return; }
+      const opts = [];
+      const rcSnapshot = new Map();
+      for (const c of firmCycles[branch]) if (!dead[c]) { opts.push(c); rcSnapshot.set(c, rc[c]); }
+      opts.sort((a, b) => rcSnapshot.get(b) - rcSnapshot.get(a));
+
+      for (const c of opts) {
+        // Reduced-cost test: forcing c cannot beat the incumbent.
+        const r = rcSnapshot.get(c);
+        if (r < 0 && value + bound + r <= incumbentValue + EPS) continue;
+        chosen.push(c);
+        for (const f of members[c]) removeFirm(f, 1);
+        dfs(value + w[c], u);
+        for (const f of members[c]) removeFirm(f, -1);
+        chosen.pop();
+        if (timedOut) { undo(); return; }
+      }
+      removeFirm(branch, 1); // branch: this firm joins no cycle
+      dfs(value, u);
+      removeFirm(branch, -1);
+      undo();
+    }
+    dfs(0, u0);
+    stats.nodes += nodes;
+    return {
+      picks: incumbent, value: incumbentValue, proven: !timedOut,
+      ub: timedOut ? Math.max(rootUB, incumbentValue) : incumbentValue,
+    };
+  }
+
+  /**
+   * @param {number} N number of firms
+   * @param {{nodes:number[], w:number}[]} cands candidate cycles
+   * @returns {{selected:number[], value:number, optimal:boolean, upperBound:number, nodes:number}}
+   */
+  KX.solvePacking = function solvePacking(N, cands, opts) {
+    const timeLimitMs = (opts && opts.timeLimitMs) || 30000;
+    const deadline = Date.now() + timeLimitMs;
+    const parent = Int32Array.from({ length: N }, (_, i) => i);
+    const find = (x) => { while (parent[x] !== x) { parent[x] = parent[parent[x]]; x = parent[x]; } return x; };
+    for (const c of cands) for (let k = 1; k < c.nodes.length; k++) parent[find(c.nodes[k])] = find(c.nodes[0]);
+
+    const comps = new Map();
+    cands.forEach((c, idx) => {
+      const r = find(c.nodes[0]);
+      if (!comps.has(r)) comps.set(r, []);
+      comps.get(r).push(idx);
+    });
+
+    const stats = { nodes: 0 };
+    const selected = [];
+    let value = 0, ub = 0, optimal = true;
+    for (const idxs of comps.values()) {
+      const localId = new Map();
+      const local = idxs.map((idx) => ({
+        w: cands[idx].w,
+        nodes: cands[idx].nodes.map((f) => {
+          if (!localId.has(f)) localId.set(f, localId.size);
+          return localId.get(f);
+        }),
+      }));
+      const r = solveComponent(local, localId.size, deadline, stats);
+      for (const p of r.picks) selected.push(idxs[p]);
+      value += r.value; ub += r.ub;
+      if (!r.proven) optimal = false;
+    }
+    return { selected, value, optimal, upperBound: ub, nodes: stats.nodes };
+  };
+
+  /** Minimum-cost assignment on a square cost matrix (flat, row-major). Returns colOfRow. */
+  KX.linearSumAssignment = function linearSumAssignment(cost, n) {
+    const INF = Infinity;
+    const uu = new Float64Array(n + 1), vv = new Float64Array(n + 1);
+    const p = new Int32Array(n + 1), way = new Int32Array(n + 1);
+    const minv = new Float64Array(n + 1), usedCol = new Uint8Array(n + 1);
+    for (let i = 1; i <= n; i++) {
+      p[0] = i;
+      let j0 = 0;
+      minv.fill(INF);
+      usedCol.fill(0);
+      do {
+        usedCol[j0] = 1;
+        const i0 = p[j0];
+        let delta = INF, j1 = 0;
+        for (let j = 1; j <= n; j++) {
+          if (usedCol[j]) continue;
+          const cur = cost[(i0 - 1) * n + (j - 1)] - uu[i0] - vv[j];
+          if (cur < minv[j]) { minv[j] = cur; way[j] = j0; }
+          if (minv[j] < delta) { delta = minv[j]; j1 = j; }
+        }
+        for (let j = 0; j <= n; j++) {
+          if (usedCol[j]) { uu[p[j]] += delta; vv[j] -= delta; } else minv[j] -= delta;
+        }
+        j0 = j1;
+      } while (p[j0] !== 0);
+      do { const j1 = way[j0]; p[j0] = p[j1]; j0 = j1; } while (j0 !== 0);
+    }
+    const colOfRow = new Int32Array(n);
+    for (let j = 1; j <= n; j++) colOfRow[p[j] - 1] = j - 1;
+    return colOfRow;
+  };
+});
+const KX = {}; globalThis.KX_MODULES.forEach((m) => m(KX));
+</script>
+<script>
+/* ===========================================================================
+ * Matching engine. Pure logic, no DOM.
+ *
+ * Reused from the research code (see research-lab.html): the cycle enumeration
+ * walk, net = W - S - C, the three participation regimes, expected profit w, and
+ * the exact packing solver (KX.solvePacking, unchanged).
+ *
+ * Adapted for the product: graph nodes are inventory LOTS, not firms. A lot joins
+ * at most one chosen cycle and a company appears at most once inside a cycle.
+ * With one lot per company this reduces exactly to the research model.
+ * ======================================================================== */
+const Engine = (function () {
+  "use strict";
+
+  /* ---- Reference data ---- */
+  const CITIES = { Seoul: [0, 0], Daegu: [150, -190], Busan: [200, -270], Daejeon: [10, -140], Gwangju: [-60, -250] };
+  const CATEGORIES = ["Denim", "Cotton woven", "Jersey & knit", "Viscose & satin", "Silk", "Linen", "Wool & suiting", "Canvas & twill", "Technical synthetics", "Swim & active"];
+  const FIBERS = ["cotton", "polyester", "recycled polyester", "viscose", "lyocell", "linen", "wool", "silk", "nylon", "elastane"];
+  const COLORS = {
+    Indigo: "#2b3f66", Black: "#232325", Navy: "#1f2c49", Grey: "#8d8f92", Ecru: "#e9e0cd", White: "#f3f0ea", Beige: "#cdb999",
+    Olive: "#68683f", Sage: "#99a78a", Terracotta: "#b6653f", Burgundy: "#6d2734", Rose: "#d2a0a0", Coral: "#e27d66", Mustard: "#c79a35", Khaki: "#a39670",
+  };
+  const CERTS = ["GOTS", "GRS", "OEKO-TEX"];
+
+  /* ---- Default rules: same values as DEFAULTS in swap_sim.py, converted to KRW ---- */
+  const DEFAULT_SETTINGS = Object.freeze({
+    L: 4, regime: "ntu", p_fail: 0.05, fail_cost_share: 0.5, credit_discount: 0.8,
+    c_fixed: 30000, c_km: 150, cost_scale: 1,
+  });
+  const REGIMES = {
+    ntu: { label: "Mutual gain", note: "Every participant must gain from the swap itself. No credits involved." },
+    credit_list: { label: "Balancing credits (simulated)", note: "Estimated-value gaps are settled in simulated credits, valued at the credit rate. This ledger is not budget-balanced and is not a payment system." },
+    credit_surplus: { label: "Surplus split (idealized)", note: "An exchange qualifies if the group gains overall, assuming gains can be shared perfectly. A theoretical upper bound, not an operable mechanism." },
+  };
+
+  /* ---- Lot helpers ---- */
+  const lotKg = (l) => (l.qty * l.width / 100 * l.gsm) / 1000;
+  const distKm = (a, b) => {
+    const p = CITIES[a] || CITIES.Seoul, q = CITIES[b] || CITIES.Seoul;
+    return Math.max(8, Math.hypot(p[0] - q[0], p[1] - q[1])); // straight-line km, 8 km floor inside a city
+  };
+  const fiberPct = (l, f) => l.composition[f] || 0;
+  function parseComposition(text) {
+    const out = {};
+    let sum = 0, parts = 0;
+    for (const raw of String(text).split(/[,;+\/]/)) {
+      const m = raw.trim().toLowerCase().match(/^(\d+(?:\.\d+)?)\s*%?\s*(.+)$/);
+      if (!m) { if (raw.trim()) return { error: `Could not read "${raw.trim()}". Use a format like 98% cotton, 2% elastane.` }; continue; }
+      if (!FIBERS.includes(m[2].trim())) return { error: `Unknown fiber "${m[2].trim()}". Known fibers: ${FIBERS.join(", ")}.` };
+      out[m[2].trim()] = (out[m[2].trim()] || 0) + Number(m[1]);
+      sum += Number(m[1]); parts++;
+    }
+    if (!parts) return { error: "Enter at least one fiber, for example 100% cotton." };
+    if (Math.abs(sum - 100) > 1) return { error: `Percentages add up to ${sum}%, not 100%.` };
+    return { composition: out };
+  }
+  const compositionText = (c) => Object.entries(c).sort((a, b) => b[1] - a[1]).map(([f, p]) => `${p}% ${f}`).join(", ");
+
+  /* ---- Compatibility: hard requirements. Replaces the random A[j,i]. ---- */
+  function checkProfile(company, profile, lot) {
+    const checks = [];
+    const add = (key, label, pass, detail) => checks.push({ key, label, pass, detail });
+    if (profile.categories && profile.categories.length)
+      add("category", "Material category", profile.categories.includes(lot.category), `${lot.category}; wanted ${profile.categories.join(" or ")}`);
+    if (profile.fiberMin && profile.fiberMin.fiber)
+      add("fiber", "Required fiber", fiberPct(lot, profile.fiberMin.fiber) >= profile.fiberMin.min, `${fiberPct(lot, profile.fiberMin.fiber)}% ${profile.fiberMin.fiber}; needs at least ${profile.fiberMin.min}%`);
+    if (profile.excludeFibers && profile.excludeFibers.length) {
+      const hit = profile.excludeFibers.filter((f) => fiberPct(lot, f) > 0);
+      add("exclude", "Excluded fibers", hit.length === 0, hit.length ? `Contains ${hit.join(", ")}` : `None of ${profile.excludeFibers.join(", ")}`);
+    }
+    if (profile.gsmMin != null || profile.gsmMax != null) {
+      const lo = profile.gsmMin ?? 0, hi = profile.gsmMax ?? Infinity;
+      add("gsm", "Weight (GSM)", lot.gsm >= lo && lot.gsm <= hi, `${lot.gsm} GSM; wanted ${lo}${hi === Infinity ? "+" : "-" + hi}`);
+    }
+    if (profile.widthMin != null) add("width", "Minimum width", lot.width >= profile.widthMin, `${lot.width} cm; needs ${profile.widthMin} cm`);
+    if (profile.qtyMin != null) add("qty", "Minimum quantity", lot.qty >= profile.qtyMin, `${lot.qty} m; needs ${profile.qtyMin} m`);
+    if (profile.colors && profile.colors.length) add("color", "Color", profile.colors.includes(lot.colorFamily), `${lot.colorFamily}; wanted ${profile.colors.join(", ")}`);
+    if (profile.certs && profile.certs.length) {
+      const miss = profile.certs.filter((c) => !(lot.certs || []).includes(c));
+      add("cert", "Certification (self-declared)", miss.length === 0, miss.length ? `Missing ${miss.join(", ")}` : `Declares ${profile.certs.join(", ")}`);
+    }
+    if (profile.maxKm != null) {
+      const d = distKm(lot.city, company.city);
+      add("distance", "Maximum distance", d <= profile.maxKm, `${Math.round(d)} km; limit ${profile.maxKm} km`);
+    }
+    return { pass: checks.every((c) => c.pass), checks };
+  }
+
+  /** Does the company accept the lot, why, and what is it worth to them (W)? */
+  function assess(company, lot) {
+    if (company.id === lot.owner) return { accepted: false, source: "own", W: 0, profiles: [] };
+    const override = (company.overrides || {})[lot.id];
+    const profiles = (company.profiles || []).map((p) => Object.assign({ profile: p }, checkProfile(company, p, lot)));
+    if (override === "reject") return { accepted: false, source: "rejected", W: 0, profiles };
+    let best = null;
+    for (const r of profiles) {
+      if (!r.pass) continue;
+      const soft = softMultiplier(r.profile, lot);
+      const W = lot.value * r.profile.valueFactor * soft;
+      if (!best || W > best.W) best = { W, soft, factor: r.profile.valueFactor, profile: r.profile, checks: r.checks };
+    }
+    if (best) return { accepted: true, source: "profile", W: best.W, soft: best.soft, factor: best.factor, profile: best.profile, checks: best.checks, profiles };
+    if (override === "accept") {
+      const factor = company.wishFactor ?? 0.9;
+      return { accepted: true, source: "wishlist", W: lot.value * factor, soft: 1, factor, checks: [], profiles };
+    }
+    return { accepted: false, source: "none", W: 0, profiles };
+  }
+  /** Preferred-but-not-required colors lower W by 10% when missed. Prototype assumption. */
+  const softMultiplier = (p, lot) => (p.preferColors && p.preferColors.length && !p.preferColors.includes(lot.colorFamily) ? 0.9 : 1);
+
+  /** Closest miss, for "why not" explanations. */
+  function closestMiss(a) {
+    if (!a.profiles || !a.profiles.length) return null;
+    const ranked = a.profiles.slice().sort((x, y) => x.checks.filter((c) => !c.pass).length - y.checks.filter((c) => !c.pass).length);
+    return { profile: ranked[0].profile, failed: ranked[0].checks.filter((c) => !c.pass) };
+  }
+
+  /* ---- Generic graph core. Works on lot indices, independent of textiles. ---- */
+  /** Port of enumerate_cycles: DFS from the smallest index, each cycle listed once. Adds: distinct owners. */
+  function enumerateCycles(G, L, limit) {
+    const n = G.n, out = [];
+    for (let a = 0; a < n; a++) { out.push([]); for (let b = 0; b < n; b++) if (a !== b && G.owner[a] !== G.owner[b] && G.edge(a, b)) out[a].push(b); }
+    const cycles = [], path = [], owners = new Set();
+    let truncated = false;
+    const visit = (s, u) => {
+      if (truncated) return;
+      for (const v of out[u]) {
+        if (v === s) { if (path.length >= 2) cycles.push(path.slice()); }
+        else if (v > s && path.length < L && !owners.has(G.owner[v])) {
+          path.push(v); owners.add(G.owner[v]);
+          visit(s, v);
+          path.pop(); owners.delete(G.owner[v]);
+        }
+        if (cycles.length >= limit) { truncated = true; return; }
+      }
+    };
+    for (let s = 0; s < n && !truncated; s++) {
+      path.length = 0; path.push(s); owners.clear(); owners.add(G.owner[s]);
+      visit(s, s);
+    }
+    return { cycles, truncated };
+  }
+
+  /** Port of cycle_stats + candidates: member gains, admissibility, expected profit. */
+  function evaluate(G, nodes, regime, P) {
+    const k = nodes.length;
+    const net = [], cc = [], x = [];
+    for (let m = 0; m < k; m++) {
+      const me = nodes[m], prev = nodes[(m - 1 + k) % k], next = nodes[(m + 1) % k];
+      cc[m] = G.C(me, next);
+      net[m] = G.W(me, prev) - G.S[me] - cc[m];
+      x[m] = G.v[prev] - G.v[me];
+    }
+    let ok, surplus = 0, net2 = null;
+    if (regime === "ntu") { ok = net.every((n) => n >= 0); surplus = net.reduce((a, b) => a + b, 0); }
+    else if (regime === "credit_list") {
+      net2 = net.map((n, m) => n - Math.max(x[m], 0) + P.credit_discount * Math.max(-x[m], 0));
+      ok = net2.every((n) => n >= 0); surplus = net2.reduce((a, b) => a + b, 0);
+    } else if (regime === "credit_surplus") { surplus = net.reduce((a, b) => a + b, 0); ok = surplus >= 0; }
+    else throw new Error("Unknown regime " + regime);
+    const succ = Math.pow(1 - P.p_fail, k);
+    const failCost = P.fail_cost_share * cc.reduce((a, b) => a + b, 0);
+    return { ok, surplus, net, net2, cc, x, succ, failCost, w: succ * surplus - (1 - succ) * failCost };
+  }
+
+  /** Port of clear_cycles: maximum total expected profit over disjoint cycles. */
+  function clear(G, list, L, opts) {
+    const cands = list.filter((c) => c.nodes.length <= L);
+    const res = { L, selected: [], value: 0, optimal: true, upperBound: 0, nCandidates: cands.length, planned: 0, expected: 0 };
+    if (!cands.length) return res;
+    const sol = KX.solvePacking(G.n, cands, opts || { timeLimitMs: 2000 });
+    res.value = sol.value; res.optimal = sol.optimal; res.upperBound = sol.upperBound;
+    res.selected = sol.selected.map((i) => cands[i]);
+    for (const c of res.selected) { res.planned += c.nodes.length; res.expected += c.nodes.length * Math.pow(1 - (opts && opts.p || 0), c.nodes.length); }
+    return res;
+  }
+
+  /* ---- Market: from platform state to all matches ---- */
+  const isPoolLot = (state, l) => l.status === "active" && byId(state.companies, l.owner) && byId(state.companies, l.owner).participating !== false;
+  const byId = (arr, id) => arr.find((x) => x.id === id);
+
+  function buildGraph(state, lots) {
+    const owner = lots.map((l) => l.owner);
+    const companies = lots.map((l) => byId(state.companies, l.owner));
+    const s = state.settings;
+    const memo = new Map();
+    const ass = (c, l) => {
+      const key = c.id + "|" + l.id;
+      if (!memo.has(key)) memo.set(key, assess(c, l));
+      return memo.get(key);
+    };
+    return {
+      n: lots.length, owner,
+      S: lots.map((l) => l.value * l.outsidePct),
+      v: lots.map((l) => l.value),
+      edge: (a, b) => ass(companies[b], lots[a]).accepted,
+      W: (me, prev) => ass(companies[me], lots[prev]).W,
+      C: (a, b) => s.cost_scale * (s.c_fixed + (s.c_km * distKm(lots[a].city, companies[b].city) * lotKg(lots[a])) / 50),
+      assess: ass, lots, companies,
+    };
+  }
+
+  /** Canonical id for a cycle: rotated to start at the smallest lot id. */
+  function signature(ids) {
+    let best = 0;
+    ids.forEach((id, i) => { if (id < ids[best]) best = i; });
+    return ids.slice(best).concat(ids.slice(0, best)).join(">");
+  }
+
+  function describe(G, nodes, ev, state, regime) {
+    const k = nodes.length, s = state.settings;
+    const members = nodes.map((me, m) => {
+      const prev = nodes[(m - 1 + k) % k], next = nodes[(m + 1) % k];
+      const lot = G.lots[me], c = G.companies[me], recv = G.lots[prev], to = G.companies[next];
+      const a = G.assess(c, recv);
+      const gain = regime === "ntu" ? ev.net[m] : regime === "credit_list" ? ev.net2[m] : ev.surplus / k;
+      return {
+        company: c.id, companyName: c.name, lotId: lot.id, lotName: lot.name,
+        toCompany: to.id, toName: to.name, fromCompany: G.companies[prev].id, fromName: G.companies[prev].name,
+        recvId: recv.id, recvName: recv.name,
+        km: distKm(lot.city, to.city), kg: lotKg(lot), fromCity: lot.city, toCity: to.city,
+        W: ev.net[m] + G.S[me] + ev.cc[m], S: G.S[me], C: ev.cc[m], net: ev.net[m], credit: ev.x[m],
+        net2: ev.net2 ? ev.net2[m] : null, gain,
+        factor: a.factor, soft: a.soft, source: a.source, profileName: a.profile ? a.profile.name : null,
+      };
+    });
+    let reason = null;
+    if (!ev.ok) {
+      const neg = members.filter((m) => m.gain < 0);
+      const costOnly = neg.length > 0 && neg.every((m) => m.W - m.S >= 0);
+      reason = regime === "credit_surplus"
+        ? "The group as a whole would lose value."
+        : costOnly ? `Logistics cost removes the gain for ${neg.map((m) => m.companyName).join(", ")}.`
+        : `${neg.map((m) => m.companyName).join(", ")} would receive less than it gives up.`;
+    } else if (ev.w <= 0) reason = "Failure risk and sunk logistics make the expected profit negative.";
+    void s;
+    return {
+      sig: signature(nodes.map((i) => G.lots[i].id)), nodes, k, lots: nodes.map((i) => G.lots[i].id),
+      companies: nodes.map((i) => G.companies[i].id), regime, members,
+      ok: ev.ok, w: ev.w, surplus: ev.surplus, succ: ev.succ, failCost: ev.failCost,
+      logistics: ev.cc.reduce((a, b) => a + b, 0), reason, eligible: ev.ok && ev.w > 0,
+    };
+  }
+
+  /** Full recalculation. Called whenever inventory, preferences, decisions or rules change. */
+  function computeMarket(state) {
+    const s = state.settings;
+    const lots = state.lots.filter((l) => isPoolLot(state, l));
+    const G = buildGraph(state, lots);
+    const { cycles, truncated } = enumerateCycles(G, 4, 200000);
+    const items = cycles.map((nodes) => {
+      const it = describe(G, nodes, evaluate(G, nodes, s.regime, s), state, s.regime);
+      it.declined = !!state.declined[it.sig];
+      return it;
+    });
+    const bySig = new Map(items.map((i) => [i.sig, i]));
+    const pool = items.filter((i) => i.eligible && !i.declined);
+    const packs = {};
+    for (const L of [2, 3, 4]) packs[L] = clear(G, pool, L, { timeLimitMs: 2000, p: s.p_fail });
+    const recommended = packs[s.L];
+    const recSet = new Set(recommended.selected.map((c) => c.sig));
+    for (const i of items) i.recommended = recSet.has(i.sig);
+    const M = { lots, G, items, bySig, pool, packs, recommended, truncated };
+    M.audit = auditPacking(state, M);
+    return M;
+  }
+
+  /* ---- Company-level views ---- */
+  function companyView(state, M, cid) {
+    const mine = M.items.filter((i) => i.companies.includes(cid));
+    const eligible = mine.filter((i) => i.eligible && !i.declined && i.k <= state.settings.L);
+    const blocked = mine.filter((i) => !i.eligible && !i.declined && i.k <= state.settings.L);
+    const inPack = (L) => M.packs[L].selected.filter((c) => c.companies.includes(cid));
+    const myLots = M.lots.filter((l) => l.owner === cid);
+    const routes = (lotId) => eligible.filter((i) => i.lots.includes(lotId));
+    const onlyMultiWay = myLots.filter((l) => {
+      const r = routes(l.id);
+      return r.length > 0 && !r.some((i) => i.k === 2);
+    });
+    return { mine, eligible, blocked, inPack, myLots, routes, onlyMultiWay };
+  }
+  const gainOf = (item, cid) => { const m = item.members.find((x) => x.company === cid); return m ? m.gain : 0; };
+
+  /** For each hop in a cycle: could this pair simply swap directly, and if not, why? */
+  function directSwapAnalysis(state, item) {
+    const out = [];
+    for (let m = 0; m < item.members.length; m++) {
+      const a = item.members[m];
+      const toLots = state.lots.find((l) => l.id === a.lotId);
+      const buyer = byId(state.companies, a.toCompany), seller = byId(state.companies, a.company);
+      const next = item.members.find((x) => x.company === a.toCompany);
+      const back = state.lots.find((l) => l.id === next.lotId);
+      if (!toLots || !back) continue;
+      const res = assess(seller, back), miss = closestMiss(res);
+      out.push({
+        from: seller.name, to: buyer.name, lotName: toLots.name, backName: back.name, accepted: res.accepted,
+        why: res.accepted ? null : miss && miss.failed.length ? miss.failed.map((f) => `${f.label}: ${f.detail}`).join("; ") : `${seller.name} has no preference that covers this lot`,
+      });
+    }
+    return out;
+  }
+
+  /* ---- Independent audit: re-derived from raw lots, not from solver output ---- */
+  function auditPacking(state, M) {
+    const seenLot = new Set(), violations = [];
+    let checked = 0;
+    for (const c of M.recommended.selected) {
+      checked++;
+      const owners = new Set(), k = c.lots.length;
+      if (k < 2 || k > state.settings.L) violations.push(`${c.sig}: length ${k}`);
+      let sum = 0, sumC = 0;
+      const nets = [];
+      for (let m = 0; m < k; m++) {
+        const lot = state.lots.find((l) => l.id === c.lots[m]), prev = state.lots.find((l) => l.id === c.lots[(m - 1 + k) % k]), next = state.lots.find((l) => l.id === c.lots[(m + 1) % k]);
+        if (seenLot.has(lot.id)) violations.push(`${c.sig}: lot ${lot.id} selected twice`);
+        seenLot.add(lot.id);
+        if (owners.has(lot.owner)) violations.push(`${c.sig}: company ${lot.owner} appears twice`);
+        owners.add(lot.owner);
+        if (lot.status !== "active") violations.push(`${c.sig}: lot ${lot.id} is not available`);
+        const me = byId(state.companies, lot.owner), to = byId(state.companies, next.owner);
+        const a = assess(me, prev);
+        if (!a.accepted) violations.push(`${c.sig}: ${me.id} does not accept ${prev.id}`);
+        const s = state.settings;
+        const cost = s.cost_scale * (s.c_fixed + (s.c_km * distKm(lot.city, to.city) * lotKg(lot)) / 50);
+        const net = a.W - lot.value * lot.outsidePct - cost;
+        const gap = prev.value - lot.value;
+        nets.push(s.regime === "credit_list" ? net - Math.max(gap, 0) + s.credit_discount * Math.max(-gap, 0) : net);
+        sumC += cost;
+      }
+      sum = nets.reduce((a, b) => a + b, 0);
+      if (state.settings.regime !== "credit_surplus" && nets.some((n) => n < -1e-6)) violations.push(`${c.sig}: a participant does not gain`);
+      if (state.settings.regime === "credit_surplus" && sum < -1e-6) violations.push(`${c.sig}: group does not gain`);
+      const succ = Math.pow(1 - state.settings.p_fail, k);
+      const w = succ * sum - (1 - succ) * state.settings.fail_cost_share * sumC;
+      if (Math.abs(w - c.w) > 1e-6) violations.push(`${c.sig}: expected profit mismatch`);
+      if (w <= 0) violations.push(`${c.sig}: expected profit not positive`);
+    }
+    return { pass: violations.length === 0, violations, checked };
+  }
+
+  /* ---- State transitions (simulated workflow) ---- */
+  function log(state, type, text, sig, companies) {
+    state.activity.unshift({ id: "a" + (state.seq = (state.seq || 0) + 1), at: state.clock ? state.clock() : Date.now(), type, text, sig: sig || null, companies: companies || [] });
+  }
+  const liveStatuses = ["proposed", "confirmed", "swatch", "pickup", "delivered"];
+  const STAGE = { confirmed: "swatch", swatch: "pickup", pickup: "delivered", delivered: "completed" };
+  const STAGE_LABEL = {
+    proposed: "Awaiting approvals", confirmed: "All approved", swatch: "Swatch check", pickup: "Pickup planned", delivered: "Delivered",
+    completed: "Completed", declined: "Declined", superseded: "Superseded", invalidated: "No longer valid", failed: "Participant dropped out",
+  };
+  const findExchange = (state, sig) => state.exchanges.find((e) => e.sig === sig && liveStatuses.includes(e.status));
+
+  function propose(state, item) {
+    const live = findExchange(state, item.sig);
+    if (live) return live;
+    const approvals = {};
+    item.companies.forEach((c) => (approvals[c] = null));
+    const ex = {
+      sig: item.sig, id: "x" + (state.seq = (state.seq || 0) + 1), status: "proposed", regime: item.regime, approvals, k: item.k,
+      companies: item.companies.slice(), lots: item.lots.slice(), snapshot: JSON.parse(JSON.stringify(item)), reasons: {},
+      createdAt: state.clock ? state.clock() : Date.now(),
+    };
+    state.exchanges.unshift(ex);
+    log(state, "proposed", `${item.k}-way exchange opened for approval`, item.sig, item.companies);
+    return ex;
+  }
+  /** Returns an error string, or null on success. */
+  function respond(state, sig, cid, decision, reason) {
+    const ex = findExchange(state, sig);
+    if (!ex || ex.status !== "proposed") return "This exchange is not awaiting approval.";
+    if (!(cid in ex.approvals)) return "This company is not part of the exchange.";
+    const name = byId(state.companies, cid).name;
+    if (decision === "declined") {
+      ex.approvals[cid] = "declined"; ex.status = "declined"; ex.reasons[cid] = reason || null;
+      state.declined[sig] = { by: cid, reason: reason || null };
+      log(state, "declined", `${name} declined the ${ex.k}-way exchange${reason ? ": " + reason : ""}`, sig, ex.companies);
+      return null;
+    }
+    const taken = ex.lots.filter((id) => { const l = state.lots.find((x) => x.id === id); return !l || l.status !== "active"; });
+    if (taken.length) return "One of these lots is no longer available.";
+    ex.approvals[cid] = "approved";
+    log(state, "approved", `${name} approved the ${ex.k}-way exchange`, sig, ex.companies);
+    if (Object.values(ex.approvals).every((v) => v === "approved")) {
+      ex.status = "confirmed";
+      for (const id of ex.lots) { const l = state.lots.find((x) => x.id === id); l.status = "reserved"; l.exchangeSig = sig; }
+      log(state, "confirmed", `All ${ex.k} participants approved. Lots reserved in the demo`, sig, ex.companies);
+      // Safeguard: nothing else may hold a lot that was just reserved.
+      for (const other of state.exchanges) {
+        if (other !== ex && other.status === "proposed" && other.lots.some((id) => ex.lots.includes(id))) {
+          other.status = "superseded";
+          log(state, "superseded", `A proposal was closed because one of its lots was reserved by another exchange`, other.sig, other.companies);
+        }
+      }
+    }
+    return null;
+  }
+  /** Simulated participants decide with a stated rule: approve if their gain clears their own hurdle. */
+  function simulateResponses(state, sig, exceptCid) {
+    const ex = findExchange(state, sig);
+    if (!ex || ex.status !== "proposed") return [];
+    const out = [];
+    for (const cid of ex.companies) {
+      if (cid === exceptCid || ex.approvals[cid]) continue;
+      if (ex.status !== "proposed") break;
+      const c = byId(state.companies, cid), m = ex.snapshot.members.find((x) => x.company === cid);
+      const yes = m.gain >= (c.hurdle || 0);
+      const reason = yes ? null : `gain below its ${Math.round((c.hurdle || 0) / 1000)}k KRW minimum`;
+      respond(state, sig, cid, yes ? "approved" : "declined", reason);
+      out.push({ cid, decision: yes ? "approved" : "declined", reason });
+    }
+    return out;
+  }
+  function advance(state, sig) {
+    const ex = findExchange(state, sig);
+    if (!ex || !STAGE[ex.status]) return "Nothing to advance.";
+    ex.status = STAGE[ex.status];
+    log(state, ex.status, `Simulated stage reached: ${STAGE_LABEL[ex.status]}`, sig, ex.companies);
+    if (ex.status === "completed") for (const id of ex.lots) { const l = state.lots.find((x) => x.id === id); if (l) l.status = "exchanged"; }
+    return null;
+  }
+  function dropout(state, sig, cid) {
+    const ex = findExchange(state, sig);
+    if (!ex || ex.status === "proposed") return "Only an approved exchange can have a dropout.";
+    ex.status = "failed";
+    for (const id of ex.lots) { const l = state.lots.find((x) => x.id === id); if (l) { l.status = "active"; delete l.exchangeSig; } }
+    state.declined[sig] = { by: cid, reason: "simulated dropout" };
+    log(state, "failed", `${byId(state.companies, cid).name} dropped out (simulated). Lots returned to the pool`, sig, ex.companies);
+    return null;
+  }
+  /** Re-checks open proposals after any change. Invalid ones close with a stated reason. */
+  function revalidate(state) {
+    let closed = 0;
+    const lots = state.lots;
+    for (const ex of state.exchanges) {
+      if (ex.status !== "proposed") continue;
+      const pool = ex.lots.map((id) => lots.find((l) => l.id === id));
+      let reason = null;
+      if (pool.some((l) => !l)) reason = "a lot was removed";
+      else if (pool.some((l) => l.status !== "active")) reason = "a lot was reserved, paused or exchanged";
+      else if (pool.some((l) => byId(state.companies, l.owner).participating === false)) reason = "a participant paused participation";
+      else {
+        const G = buildGraph(state, pool);
+        const n = pool.length, order = ex.lots.map((id) => pool.findIndex((l) => l.id === id));
+        for (let m = 0; m < n && !reason; m++) if (!G.edge(order[m], order[(m + 1) % n])) reason = `${G.companies[order[(m + 1) % n]].name} no longer accepts the lot`;
+        if (!reason) {
+          const ev = evaluate(G, order, ex.regime, state.settings);
+          if (!ev.ok || ev.w <= 0) reason = "it no longer passes the economic test";
+          else ex.snapshot = describe(G, order, ev, state, ex.regime);
+        }
+      }
+      if (reason) {
+        ex.status = "invalidated"; ex.closedReason = reason;
+        log(state, "invalidated", `A proposal closed automatically because ${reason}`, ex.sig, ex.companies);
+        closed++;
+      }
+    }
+    return closed;
+  }
+
+  /** Lots that cannot be edited or removed because an exchange holds them. */
+  const lotLockedBy = (state, lotId) => state.exchanges.find((e) => ["confirmed", "swatch", "pickup", "delivered"].includes(e.status) && e.lots.includes(lotId));
+
+  return {
+    CITIES, CATEGORIES, FIBERS, COLORS, CERTS, REGIMES, DEFAULT_SETTINGS, STAGE_LABEL, STAGE,
+    lotKg, distKm, fiberPct, parseComposition, compositionText, checkProfile, assess, closestMiss,
+    enumerateCycles, evaluate, clear, signature, buildGraph, computeMarket, companyView, gainOf, directSwapAnalysis, auditPacking,
+    propose, respond, simulateResponses, advance, dropout, revalidate, findExchange, lotLockedBy, byId, log,
+  };
+})();
+</script>
+<script>
+/* ===========================================================================
+ * Demo data. Every company, lot and history entry below is fictional and was
+ * written for this prototype. Values are illustrative, not market prices.
+ * ======================================================================== */
+const Seed = (function () {
+  "use strict";
+  const P = (name, o) => Object.assign({ id: "p-" + name.toLowerCase().replace(/[^a-z]+/g, "-"), name, categories: [], valueFactor: 1 }, o);
+
+  const companies = [
+    { id: "namsan", name: "Namsan Atelier", city: "Seoul", kind: "Contemporary womenswear", hue: "#1f4d3a", hurdle: 100000, profiles: [
+      P("Fluid dress fabrics", { categories: ["Viscose & satin"], gsmMin: 90, gsmMax: 180, qtyMin: 200, valueFactor: 1.05, preferColors: ["Terracotta", "Burgundy", "Black", "Rose"] }),
+      P("Summer linen", { categories: ["Linen"], fiberMin: { fiber: "linen", min: 50 }, gsmMin: 120, gsmMax: 240, qtyMin: 150, valueFactor: 0.95 }),
+    ] },
+    { id: "palgong", name: "Palgong Knit Mills", city: "Daegu", kind: "Circular knit mill", hue: "#8a5a2b", hurdle: 150000, profiles: [
+      P("Denim for workwear capsule", { categories: ["Denim"], fiberMin: { fiber: "cotton", min: 90 }, gsmMin: 280, gsmMax: 360, qtyMin: 300, valueFactor: 1 }),
+    ] },
+    { id: "mudeung", name: "Mudeung Silk & Viscose", city: "Gwangju", kind: "Fluid fabric converter", hue: "#7a2e3a", hurdle: 150000, profiles: [
+      P("Cotton jersey for basics line", { categories: ["Jersey & knit"], fiberMin: { fiber: "cotton", min: 90 }, gsmMin: 140, gsmMax: 220, qtyMin: 300, valueFactor: 1.1 }),
+    ] },
+    { id: "yeonhui", name: "Yeonhui Studio", city: "Seoul", kind: "Independent bag and accessory label", hue: "#3a4c7a", hurdle: 80000, profiles: [
+      P("Technical shells for bags", { categories: ["Technical synthetics"], fiberMin: { fiber: "nylon", min: 80 }, qtyMin: 150, valueFactor: 1.1 }),
+      P("Silk linings", { categories: ["Silk"], qtyMin: 100, valueFactor: 0.85 }),
+    ] },
+    { id: "daecheong", name: "Daecheong Home Textiles", city: "Daejeon", kind: "Soft furnishings manufacturer", hue: "#5c6b3c", hurdle: 100000, profiles: [
+      P("Linen for table and bed", { categories: ["Linen"], gsmMin: 140, gsmMax: 260, qtyMin: 200, valueFactor: 1.1 }),
+    ] },
+    { id: "hangang", name: "Hangang Uniform Supply", city: "Seoul", kind: "Corporate uniform producer", hue: "#2c3e50", hurdle: 150000, profiles: [
+      P("Heavy cotton canvas", { categories: ["Canvas & twill"], fiberMin: { fiber: "cotton", min: 90 }, gsmMin: 280, qtyMin: 300, valueFactor: 1.05 }),
+      P("Heavy denim for overalls", { categories: ["Denim"], fiberMin: { fiber: "cotton", min: 95 }, gsmMin: 330, qtyMin: 250, valueFactor: 0.9 }),
+    ] },
+    { id: "gyeongbu", name: "Gyeongbu Technical Fabrics", city: "Daegu", kind: "Performance fabric trader", hue: "#4a4a55", hurdle: 150000, profiles: [
+      P("Poly-rich twill for coating", { categories: ["Canvas & twill"], fiberMin: { fiber: "polyester", min: 50 }, gsmMin: 180, gsmMax: 260, qtyMin: 500, valueFactor: 1 }),
+    ] },
+    { id: "dongrae", name: "Dongrae Denim Works", city: "Busan", kind: "Denim garment manufacturer", hue: "#27406b", hurdle: 150000, profiles: [
+      P("Pocketing and lining twill", { categories: ["Canvas & twill"], fiberMin: { fiber: "polyester", min: 50 }, gsmMin: 150, gsmMax: 260, qtyMin: 300, valueFactor: 1 }),
+    ] },
+    { id: "seomjin", name: "Seomjin Linen House", city: "Gwangju", kind: "Linen specialist", hue: "#94804f", hurdle: 50000, profiles: [
+      P("Crisp cotton shirting", { categories: ["Cotton woven"], fiberMin: { fiber: "cotton", min: 90 }, gsmMin: 90, gsmMax: 160, qtyMin: 200, valueFactor: 1.05 }),
+      P("Tricot for bag liners", { categories: ["Swim & active"], qtyMin: 300, valueFactor: 0.8 }),
+    ] },
+    { id: "haeundae", name: "Haeundae Swim & Active", city: "Busan", kind: "Swim and activewear brand", hue: "#b4583f", hurdle: 50000, profiles: [
+      P("Coarse linen for packaging", { categories: ["Linen"], gsmMin: 350, qtyMin: 300, valueFactor: 0.85 }),
+    ] },
+  ].map((c) => Object.assign({ participating: true, overrides: {}, wishFactor: 0.9 }, c));
+
+  const L = (id, owner, name, category, composition, gsm, width, colorFamily, color, qty, city, value, outsidePct, certs, note) =>
+    ({ id, owner, name, category, composition, gsm, width, colorFamily, color, qty, city, value, outsidePct, certs: certs || [], note: note || "", photos: [], status: "active" });
+
+  const lots = [
+    L("L01", "namsan", "Washed Indigo Selvedge Denim", "Denim", { cotton: 100 }, 320, 150, "Indigo", "Washed indigo", 420, "Seoul", 6300000, 0.45, [], "Cancelled capsule. Rolls in original wrap."),
+    L("L02", "namsan", "Black Crepe Suiting", "Wool & suiting", { wool: 70, polyester: 30 }, 240, 150, "Black", "Black", 180, "Seoul", 3960000, 0.55, [], "Overrun from autumn tailoring."),
+    L("L03", "palgong", "Heather Grey Cotton Jersey", "Jersey & knit", { cotton: 95, elastane: 5 }, 180, 180, "Grey", "Heather grey", 520, "Daegu", 4160000, 0.5, ["OEKO-TEX"], "Single jersey, tubular opened."),
+    L("L04", "palgong", "Navy French Terry", "Jersey & knit", { cotton: 80, polyester: 20 }, 320, 170, "Navy", "Navy", 260, "Daegu", 2860000, 0.5, [], "Loopback, light brushing."),
+    L("L05", "mudeung", "Terracotta Viscose Satin", "Viscose & satin", { viscose: 100 }, 120, 140, "Terracotta", "Burnt terracotta", 600, "Gwangju", 5400000, 0.5, [], "Dye lot consistent across rolls."),
+    L("L06", "mudeung", "Ivory Silk Habotai", "Silk", { silk: 100 }, 60, 114, "Ecru", "Ivory", 240, "Gwangju", 4800000, 0.6, [], "Lightweight lining weight."),
+    L("L07", "yeonhui", "Natural Slub Linen", "Linen", { linen: 100 }, 165, 148, "Beige", "Natural", 260, "Seoul", 3380000, 0.5, [], "Visible slub, stone washed."),
+    L("L08", "yeonhui", "Black Cotton Sateen", "Cotton woven", { cotton: 97, elastane: 3 }, 210, 145, "Black", "Black", 140, "Seoul", 1400000, 0.5, [], "Short run from sample production."),
+    L("L09", "daecheong", "Olive Heavy Canvas", "Canvas & twill", { cotton: 100 }, 340, 150, "Olive", "Olive drab", 400, "Daejeon", 3600000, 0.5, [], "Soft-hand finish."),
+    L("L10", "daecheong", "Sage Linen-Cotton Blend", "Linen", { linen: 55, cotton: 45 }, 150, 280, "Sage", "Pale sage", 90, "Daejeon", 1170000, 0.5, [], "Wide width bedding stock."),
+    L("L11", "hangang", "Navy Poly-Cotton Twill", "Canvas & twill", { polyester: 65, cotton: 35 }, 230, 150, "Navy", "Corporate navy", 800, "Seoul", 3600000, 0.45, [], "Uniform contract ended early."),
+    L("L12", "hangang", "Khaki Poly-Cotton Drill", "Canvas & twill", { polyester: 65, cotton: 35 }, 210, 150, "Khaki", "Khaki", 700, "Seoul", 3150000, 0.5, [], "Stable shrinkage."),
+    L("L13", "gyeongbu", "Black Nylon Ripstop", "Technical synthetics", { nylon: 100 }, 110, 150, "Black", "Black", 500, "Daegu", 4000000, 0.5, [], "DWR finish."),
+    L("L14", "gyeongbu", "Grey Recycled Oxford", "Technical synthetics", { "recycled polyester": 100 }, 200, 150, "Grey", "Melange grey", 350, "Daegu", 2100000, 0.5, ["GRS"], "PU backed."),
+    L("L15", "dongrae", "Raw Indigo 14oz Denim", "Denim", { cotton: 100 }, 470, 150, "Indigo", "Raw indigo", 650, "Busan", 7150000, 0.5, [], "Sanforized. High-value stock."),
+    L("L16", "dongrae", "Black Stretch Denim", "Denim", { cotton: 98, elastane: 2 }, 340, 150, "Black", "Overdyed black", 300, "Busan", 3000000, 0.5, [], "Order cancelled at cutting stage."),
+    L("L17", "seomjin", "Oatmeal Linen Blend", "Linen", { linen: 55, cotton: 45 }, 200, 150, "Beige", "Oatmeal", 300, "Gwangju", 2700000, 0.5, [], "Yarn-dyed."),
+    L("L18", "seomjin", "Coarse Linen Offcuts", "Linen", { linen: 100 }, 420, 150, "Ecru", "Natural", 900, "Gwangju", 900000, 0.5, [], "Low value, heavy to move."),
+    L("L19", "haeundae", "Coral Recycled Tricot", "Swim & active", { "recycled polyester": 82, elastane: 18 }, 190, 150, "Coral", "Coral", 400, "Busan", 1400000, 0.5, ["GRS"], "Excess after colour change."),
+    L("L20", "haeundae", "Black Nylon Spandex", "Swim & active", { nylon: 80, elastane: 20 }, 200, 150, "Black", "Black", 220, "Busan", 1980000, 0.5, [], "Four-way stretch."),
+  ];
+
+  /** Fictional past entries so the Activity page has history on first open. */
+  const history = [
+    { id: "h1", status: "completed", k: 3, title: "3-way exchange: Stone Twill, Plain Rib, Rayon Challis", parties: ["Namsan Atelier", "Palgong Knit Mills", "Mudeung Silk & Viscose"], daysAgo: 21, sample: true },
+    { id: "h2", status: "declined", k: 2, title: "2-way exchange: Black Crepe Suiting, Grey Oxford", parties: ["Namsan Atelier", "Gyeongbu Technical Fabrics"], daysAgo: 9, sample: true, note: "Declined by Gyeongbu Technical Fabrics in the sample history." },
+    { id: "h3", status: "completed", k: 2, title: "2-way exchange: Sand Canvas, Pocket Twill", parties: ["Dongrae Denim Works", "Hangang Uniform Supply"], daysAgo: 34, sample: true },
+  ];
+
+  function fresh() {
+    return JSON.parse(JSON.stringify({
+      v: 1, current: "namsan", companies, lots, history, exchanges: [], declined: {}, activity: [], seq: 100,
+      settings: Object.assign({}, Engine.DEFAULT_SETTINGS), nextLot: 1,
+    }));
+  }
+  /** The prefilled lot used in the guided demo (Namsan adds it, Seomjin wants it). */
+  const tourLot = () => ({
+    name: "Ecru Organic Cotton Poplin", category: "Cotton woven", compositionText: "100% cotton", gsm: 120, width: 150, colorFamily: "Ecru", color: "Natural ecru",
+    qty: 280, city: "Seoul", value: 2520000, outsidePct: 0.5, certs: ["GOTS"], note: "Shirting overrun.",
+  });
+  return { fresh, tourLot };
+})();
+</script>
+<script>
+/* ===========================================================================
+ * Built-in checks: small markets with hand-worked answers, plus workflow rules.
+ * Run from the How it works page. Expected values are literals.
+ * ======================================================================== */
+const Checks = (function () {
+  "use strict";
+  const co = (id, city, profiles, extra) => Object.assign({ id, name: id, city, participating: true, overrides: {}, wishFactor: 0.9, hurdle: 0, profiles: profiles || [] }, extra);
+  const lot = (id, owner, category, value, extra) => Object.assign({ id, owner, name: id, category, composition: { cotton: 100 }, gsm: 200, width: 100, colorFamily: "Black", qty: 100, city: "Seoul", value, outsidePct: 0.5, certs: [], status: "active" }, extra);
+  const want = (cat, f, extra) => Object.assign({ id: "w", name: "w " + cat, categories: [cat], valueFactor: f }, extra);
+  const st = (companies, lots, s) => ({ companies, lots, exchanges: [], declined: {}, activity: [], seq: 0, settings: Object.assign({}, Engine.DEFAULT_SETTINGS, { p_fail: 0, c_fixed: 0, c_km: 0 }, s) });
+  const sigs = (pack) => pack.selected.map((c) => c.sig).sort().join(" + ") || "none";
+
+  const CASES = [
+    ["3-way succeeds where 2-way finds nothing", () => {
+      const s = st([co("A", "Seoul", [want("Linen", 1)]), co("B", "Seoul", [want("Denim", 1)]), co("C", "Seoul", [want("Silk", 1)])],
+        [lot("a", "A", "Denim", 100), lot("b", "B", "Silk", 100), lot("c", "C", "Linen", 100)]);
+      const M = Engine.computeMarket(s);
+      return [["2-way exchanges", "none", sigs(M.packs[2])], ["Up to 3-way", "a>b>c", sigs(M.packs[3])], ["Net gain each (100 - 50)", 50, M.packs[3].selected[0].members[0].net]];
+    }],
+    ["4-way needs the cap raised to 4", () => {
+      const s = st([co("A", "Seoul", [want("Silk", 1)]), co("B", "Seoul", [want("Denim", 1)]), co("C", "Seoul", [want("Linen", 1)]), co("D", "Seoul", [want("Wool & suiting", 1)])],
+        [lot("a", "A", "Denim", 100), lot("b", "B", "Linen", 100), lot("c", "C", "Wool & suiting", 100), lot("d", "D", "Silk", 100)]);
+      const M = Engine.computeMarket(s);
+      return [["Up to 3-way", "none", sigs(M.packs[3])], ["Up to 4-way", "a>b>c>d", sigs(M.packs[4])]];
+    }],
+    ["A lot is never used twice", () => {
+      // Lot a could swap with b or c. Only the more valuable swap may be chosen.
+      const s = st([co("A", "Seoul", [want("Silk", 1), want("Linen", 1)]), co("B", "Seoul", [want("Denim", 1)]), co("C", "Seoul", [want("Denim", 1)])],
+        [lot("a", "A", "Denim", 100), lot("b", "B", "Silk", 120), lot("c", "C", "Linen", 200)]);
+      const M = Engine.computeMarket(s);
+      const used = M.recommended.selected.flatMap((c) => c.lots);
+      return [["Lots used", new Set(used).size, used.length], ["Chosen swap", "a>c", sigs(M.recommended)], ["Audit", "pass", M.audit.pass ? "pass" : "fail"]];
+    }],
+    ["A company may join two cycles with two different lots", () => {
+      const s = st([co("A", "Seoul", [want("Silk", 1), want("Linen", 1)]), co("B", "Seoul", [want("Denim", 1)]), co("C", "Seoul", [want("Wool & suiting", 1)])],
+        [lot("a1", "A", "Denim", 100), lot("a2", "A", "Wool & suiting", 100), lot("b", "B", "Silk", 100), lot("c", "C", "Linen", 100)]);
+      const M = Engine.computeMarket(s);
+      return [["Selected", "a1>b + a2>c", sigs(M.recommended)]];
+    }],
+    ["A company cannot appear twice inside a cycle", () => {
+      const s = st([co("A", "Seoul", [want("Silk", 1)]), co("B", "Seoul", [want("Denim", 1), want("Wool & suiting", 1)]), co("C", "Seoul", [want("Linen", 1)])],
+        [lot("a1", "A", "Denim", 100), lot("a2", "A", "Linen", 100), lot("b", "B", "Silk", 100), lot("c", "C", "Wool & suiting", 100)]);
+      const M = Engine.computeMarket(s);
+      const bad = M.items.filter((i) => new Set(i.companies).size !== i.companies.length).length;
+      return [["Cycles with a repeated company", 0, bad]];
+    }],
+    ["Hard requirements block a match, and the reason is reported", () => {
+      const company = co("A", "Seoul", [want("Denim", 1, { gsmMin: 300, gsmMax: 400 })]);
+      const a = Engine.assess(company, lot("x", "B", "Denim", 100, { gsm: 200 }));
+      return [["Accepted", "no", a.accepted ? "yes" : "no"], ["Failed requirement", "gsm", Engine.closestMiss(a).failed[0].key]];
+    }],
+    ["Logistics cost can remove a match", () => {
+      // W=60, S=50, C=c_fixed. Gain 10 at C=0, gain -5 at C=15.
+      const build = (fixed) => st([co("A", "Seoul", [want("Silk", 0.6)]), co("B", "Seoul", [want("Denim", 0.6)])], [lot("a", "A", "Denim", 100), lot("b", "B", "Silk", 100)], { c_fixed: fixed });
+      return [["Free shipping", "a>b", sigs(Engine.computeMarket(build(0)).recommended)], ["Costly shipping", "none", sigs(Engine.computeMarket(build(15)).recommended)]];
+    }],
+    ["Weight and distance follow the documented formula", () => {
+      const l = lot("a", "A", "Denim", 100, { qty: 100, width: 150, gsm: 200, city: "Seoul" });
+      const kg = Engine.lotKg(l); // 100 x 1.5 x 0.2 = 30 kg
+      const km = Engine.distKm("Seoul", "Daejeon"); // sqrt(10^2 + 140^2)
+      return [["Weight in kg", 30, kg], ["Distance in km", 140.3567, +km.toFixed(4)]];
+    }],
+    ["Credit regimes differ, and mutual gain stays strict", () => {
+      // Gains +30 and -5 at values 20 and 50, same arithmetic as research scenario S6.
+      const make = (regime, dsc) => st([
+        co("A", "Seoul", [want("Silk", 42 / 50)]), co("B", "Seoul", [want("Denim", 7 / 20)]),
+      ], [lot("a", "A", "Denim", 20, { outsidePct: 0.5 }), lot("b", "B", "Silk", 50, { outsidePct: 0.2 })], { regime, credit_discount: dsc, c_fixed: 2 });
+      const v = (r, d) => { const M = Engine.computeMarket(make(r, d)); return M.recommended.selected[0] ? +M.recommended.selected[0].w.toFixed(6) : "none"; };
+      return [["Mutual gain", "none", v("ntu", 0.8)], ["Surplus split", 25, v("credit_surplus", 0.8)], ["Balancing credits", 19, v("credit_list", 0.8)], ["Credits at 10%", "none", v("credit_list", 0.1)]];
+    }],
+    ["Failure risk uses (1-p)^k", () => {
+      // Research S2: k=3, gain 18 each, C=2 each, p=0.05 -> 45.870375.
+      const s = st([co("A", "Seoul", [want("Linen", 0.3)]), co("B", "Seoul", [want("Denim", 0.3)]), co("C", "Seoul", [want("Silk", 0.3)])],
+        [lot("a", "A", "Denim", 100, { outsidePct: 0.1 }), lot("b", "B", "Silk", 100, { outsidePct: 0.1 }), lot("c", "C", "Linen", 100, { outsidePct: 0.1 })], { p_fail: 0.05, c_fixed: 2 });
+      return [["Expected profit", 45.870375, +Engine.computeMarket(s).recommended.selected[0].w.toFixed(6)]];
+    }],
+    ["Declining removes the cycle; approval reserves its lots", () => {
+      const make = () => st([co("A", "Seoul", [want("Linen", 1)]), co("B", "Seoul", [want("Denim", 1)]), co("C", "Seoul", [want("Silk", 1)])],
+        [lot("a", "A", "Denim", 100), lot("b", "B", "Silk", 100), lot("c", "C", "Linen", 100)]);
+      const d = make(); let M = Engine.computeMarket(d);
+      Engine.propose(d, M.bySig.get("a>b>c")); Engine.respond(d, "a>b>c", "A", "declined");
+      M = Engine.computeMarket(d);
+      const c = make(); M = Engine.computeMarket(c); const item = M.bySig.get("a>b>c");
+      Engine.propose(c, item); ["A", "B", "C"].forEach((x) => Engine.respond(c, "a>b>c", x, "approved"));
+      const after = Engine.computeMarket(c);
+      return [["After decline, selected", "none", sigs(Engine.computeMarket(d).recommended)], ["Status after all approve", "confirmed", c.exchanges[0].status], ["Reserved lots left in pool", 0, after.lots.length]];
+    }],
+    ["Removing or changing inputs closes an open proposal", () => {
+      const make = () => st([co("A", "Seoul", [want("Linen", 1)]), co("B", "Seoul", [want("Denim", 1)]), co("C", "Seoul", [want("Silk", 1)])],
+        [lot("a", "A", "Denim", 100), lot("b", "B", "Silk", 100), lot("c", "C", "Linen", 100)]);
+      const a = make(); Engine.propose(a, Engine.computeMarket(a).bySig.get("a>b>c"));
+      a.lots = a.lots.filter((l) => l.id !== "b"); Engine.revalidate(a);
+      const b = make(); Engine.propose(b, Engine.computeMarket(b).bySig.get("a>b>c"));
+      b.companies[1].profiles = []; Engine.revalidate(b);
+      return [["Lot removed", "invalidated", a.exchanges[0].status], ["Preference removed", "invalidated", b.exchanges[0].status]];
+    }],
+    ["Demo data: guided 3-way exists with no 2-way for that lot", () => {
+      const s = Seed.fresh(), M = Engine.computeMarket(s), v = Engine.companyView(s, M, "namsan");
+      const r = v.routes("L01");
+      return [["L01 has a 3-way route", "yes", r.some((i) => i.k === 3 && i.sig === "L01>L03>L05") ? "yes" : "no"], ["L01 has a 2-way route", "no", r.some((i) => i.k === 2) ? "yes" : "no"], ["Audit of recommended round", "pass", M.audit.pass ? "pass" : "fail"]];
+    }],
+  ];
+
+  function run() {
+    return CASES.map(([title, fn]) => {
+      let rows;
+      try {
+        rows = fn().map(([label, expected, actual]) => ({ label, expected, actual, ok: typeof expected === "number" ? Math.abs(expected - actual) < 1e-6 : expected === actual }));
+      } catch (e) { rows = [{ label: "Execution", expected: "no error", actual: String(e), ok: false }]; }
+      return { title, rows, ok: rows.every((r) => r.ok) };
+    });
+  }
+  return { run };
+})();
+</script>
+<script>
+/* ===========================================================================
+ * UI foundation: state, persistence, formatting, generated swatches, exchange graph.
+ * ======================================================================== */
+const STORE_KEY = "reweft.demo.v1";
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) { const s = JSON.parse(raw); if (s && s.v === 1 && Array.isArray(s.lots)) return s; }
+  } catch (e) { /* storage unavailable: run in memory */ }
+  return null;
+}
+let storageOk = true;
+function saveState() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); storageOk = true; }
+  catch (e) { storageOk = false; }
+}
+let state = loadState() || Seed.fresh();
+let M = null;
+const ui = {
+  page: "dashboard", sig: null, drawer: null, tour: null, toast: null,
+  mp: { q: "", cat: "all", fiber: "all", city: "all", color: "all", gsmMin: "", gsmMax: "", qtyMin: "", fit: "all" },
+  matchK: "all", matchScope: "mine", invFilter: "active", actScope: "mine", rulesOpen: false, checks: null,
+};
+const me = () => Engine.byId(state.companies, state.current);
+const coOf = (id) => Engine.byId(state.companies, id);
+const lotOf = (id) => state.lots.find((l) => l.id === id);
+
+/* ---- Formatting ---- */
+const won = (x) => {
+  const a = Math.abs(x), sign = x < 0 ? "−" : "";
+  if (a >= 1e6) return `${sign}₩${(a / 1e6).toFixed(a >= 1e7 ? 1 : 2)}M`;
+  if (a >= 1e3) return `${sign}₩${Math.round(a / 1e3)}k`;
+  return `${sign}₩${Math.round(a)}`;
+};
+const signed = (x) => (x >= 0 ? "+" : "") + won(x);
+const initials = (name) => name.split(/\s+/).filter((w) => /^[A-Z]/.test(w)).slice(0, 2).map((w) => w[0]).join("");
+const monogram = (c, small) => `<span class="mono ${small ? "sm" : ""}" style="background:${c ? c.hue || "#555" : "#555"}">${esc(c ? initials(c.name) : "?")}</span>`;
+const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
+const ago = (t) => {
+  const d = (Date.now() - t) / 864e5;
+  if (d < 1 / 24) return "Just now";
+  if (d < 1) return Math.round(d * 24) + " h ago";
+  return Math.round(d) + " d ago";
+};
+
+/* ---- Generated textile swatches (no external image files) ---- */
+function shade(hex, amt) {
+  const n = parseInt(hex.slice(1), 16);
+  const f = (v) => Math.max(0, Math.min(255, Math.round(v + 255 * amt)));
+  return `rgb(${f(n >> 16)},${f((n >> 8) & 255)},${f(n & 255)})`;
+}
+const swatchCache = new Map();
+function weaveSvg(category, hex) {
+  const key = category + hex;
+  if (swatchCache.has(key)) return swatchCache.get(key);
+  const hi = shade(hex, 0.09), hi2 = shade(hex, 0.17), lo = shade(hex, -0.07);
+  let s = `<rect width="96" height="96" fill="${hex}"/>`;
+  const line = (x1, y1, x2, y2, c, w, o) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}" stroke-width="${w}" opacity="${o ?? 1}"/>`;
+  if (category === "Denim") {
+    for (let i = -96; i < 96; i += 4) s += line(i, 96, i + 96, 0, hi2, 1.3, 0.55);
+    for (let i = -96; i < 96; i += 8) s += line(i + 2, 96, i + 98, 0, lo, 1, 0.6);
+  } else if (category === "Jersey & knit" || category === "Swim & active") {
+    for (let y = 0; y < 96; y += 6) for (let x = (y / 6) % 2 ? 3 : 0; x < 96; x += 6) s += `<path d="M${x} ${y + 5}q3 -6 6 0" fill="none" stroke="${hi2}" stroke-width="1.1" opacity=".75"/>`;
+  } else if (category === "Viscose & satin" || category === "Silk") {
+    for (let i = -96; i < 96; i += 24) s += line(i, 96, i + 96, 0, hi2, 11, 0.16);
+    for (let i = -84; i < 96; i += 24) s += line(i, 96, i + 96, 0, lo, 7, 0.18);
+  } else if (category === "Linen") {
+    const r = [5, 11, 2, 17, 8, 13, 3, 19, 7, 15, 1, 10];
+    for (let i = 0; i < 24; i++) s += line(0, i * 4 + 2, 96, i * 4 + 2 + (r[i % 12] % 3) - 1, i % 3 ? hi : lo, 1 + (r[i % 12] % 2) * 0.8, 0.8);
+    for (let i = 0; i < 24; i++) s += line(i * 4 + 2, 0, i * 4 + 2 + (r[(i + 5) % 12] % 3) - 1, 96, i % 4 ? hi2 : lo, 0.9 + (r[(i + 3) % 12] % 2) * 0.7, 0.55);
+  } else if (category === "Wool & suiting") {
+    for (let c = 0; c < 8; c++) for (let i = -2; i < 16; i++) {
+      const x = c * 12, y = i * 6, up = c % 2 === 0;
+      s += line(x, up ? y + 12 : y, x + 12, up ? y : y + 12, c % 2 ? hi2 : lo, 1.2, 0.65);
+    }
+  } else if (category === "Canvas & twill") {
+    for (let y = 0; y < 96; y += 6) for (let x = (y / 6) % 2 ? 6 : 0; x < 96; x += 12) s += `<rect x="${x}" y="${y}" width="6" height="6" fill="${hi}" opacity=".7"/>`;
+    for (let i = 0; i <= 96; i += 6) s += line(0, i, 96, i, lo, 0.6, 0.5);
+  } else if (category === "Technical synthetics") {
+    for (let i = 0; i <= 96; i += 3) s += line(0, i, 96, i, hi, 0.5, 0.45);
+    for (let i = 0; i <= 96; i += 16) { s += line(0, i, 96, i, hi2, 1.3, 0.8); s += line(i, 0, i, 96, hi2, 1.3, 0.8); }
+  } else {
+    for (let i = 0; i <= 96; i += 3) { s += line(0, i, 96, i, hi, 0.8, 0.6); s += line(i, 0, i, 96, lo, 0.7, 0.45); }
+  }
+  const uri = "data:image/svg+xml," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">${s}</svg>`);
+  swatchCache.set(key, uri);
+  return uri;
+}
+const lotHex = (l) => Engine.COLORS[l.colorFamily] || "#999999";
+const swatchUri = (l) => (l.photos && l.photos[0]) || weaveSvg(l.category, lotHex(l));
+function swatchStyle(l) {
+  if (l.photos && l.photos[0]) return `background-image:url('${l.photos[0]}');background-size:cover`;
+  return `background-image:linear-gradient(140deg,rgba(255,255,255,.2),rgba(0,0,0,.16)),url('${weaveSvg(l.category, lotHex(l))}');background-size:cover,88px`;
+}
+/** Lot lookups that survive removal: exchange snapshots keep lot names only. */
+const swatchFor = (id, name) => { const l = lotOf(id); return l ? swatchStyle(l) : "background:#d9d5ca"; void name; };
+
+/* ---- Exchange graph: who sends what to whom ---- */
+function wrapLabel(text, max) {
+  const words = String(text).split(" "), lines = [""];
+  for (const w of words) {
+    if ((lines[lines.length - 1] + " " + w).trim().length > max && lines.length < 2) lines.push(w);
+    else lines[lines.length - 1] = (lines[lines.length - 1] + " " + w).trim();
+  }
+  return lines;
+}
+function exchangeGraph(item, W, o = {}) {
+  const k = item.members.length;
+  const compact = !!o.compact || W < 470;
+  const H = o.height || (compact ? Math.max(220, W * 0.78) : k === 2 ? 300 : 430);
+  const cx = W / 2, cy = H / 2 + (k === 3 ? 14 : 0);
+  const rx = k === 2 ? W * (compact ? 0.32 : 0.28) : Math.min(W * (compact ? 0.33 : 0.27), H * 0.36);
+  const ry = k === 2 ? 0 : H * (compact ? 0.33 : 0.34);
+  const ink = o.ink || "var(--ink)", sub = o.sub || "var(--ink-2)", arrow = o.arrow || "var(--brand)";
+  const uid = "g" + Math.random().toString(36).slice(2, 8);
+  const nodes = item.members.map((m, i) => {
+    const a = k === 2 ? (i === 0 ? Math.PI : 0) : (2 * Math.PI * i) / k - Math.PI / 2;
+    return { m, x: cx + rx * Math.cos(a), y: cy + (k === 2 ? 0 : ry * Math.sin(a)) };
+  });
+  const nodeR = compact ? 15 : 21, chipR = compact ? 14 : 21;
+  let edges = "", chips = "", labels = "";
+  nodes.forEach((n, i) => {
+    const t = nodes[(i + 1) % k];
+    const dx = t.x - n.x, dy = t.y - n.y, len = Math.hypot(dx, dy) || 1;
+    let mx = (n.x + t.x) / 2, my = (n.y + t.y) / 2;
+    let ox = mx - cx, oy = my - cy, ol = Math.hypot(ox, oy);
+    if (k === 2) { ox = dy / len; oy = -dx / len; ol = 1; } else if (ol < 1) { ox = 0; oy = -1; ol = 1; }
+    const bend = k === 2 ? (compact ? 42 : 62) : compact ? 16 : 30;
+    const qx = mx + (ox / ol) * bend, qy = my + (oy / ol) * bend;
+    const a1 = Math.atan2(qy - n.y, qx - n.x), a2 = Math.atan2(t.y - qy, t.x - qx);
+    const sx = n.x + Math.cos(a1) * (nodeR + 4), sy = n.y + Math.sin(a1) * (nodeR + 4);
+    const ex = t.x - Math.cos(a2) * (nodeR + 8), ey = t.y - Math.sin(a2) * (nodeR + 8);
+    edges += `<path d="M${sx} ${sy}Q${qx} ${qy} ${ex} ${ey}" fill="none" stroke="${arrow}" stroke-width="2" marker-end="url(#${uid}a)"/>`;
+    const px = 0.25 * sx + 0.5 * qx + 0.25 * ex, py = 0.25 * sy + 0.5 * qy + 0.25 * ey;
+    const l = lotOf(n.m.lotId);
+    const href = l ? swatchUri(l) : "";
+    chips += `<g><title>${esc(n.m.companyName)} sends ${esc(n.m.lotName)} to ${esc(n.m.toName)}</title><clipPath id="${uid}c${i}"><circle cx="${px}" cy="${py}" r="${chipR}"/></clipPath><circle cx="${px}" cy="${py}" r="${chipR + 2.5}" fill="var(--panel)"/><rect x="${px - chipR}" y="${py - chipR}" width="${chipR * 2}" height="${chipR * 2}" fill="${l ? lotHex(l) : "#aaa"}" clip-path="url(#${uid}c${i})"/><image href="${href}" x="${px - chipR}" y="${py - chipR}" width="${chipR * 2}" height="${chipR * 2}" preserveAspectRatio="xMidYMid slice" clip-path="url(#${uid}c${i})"/></g>`;
+    if (!compact) {
+      const ux = px - cx, uy = py - cy;
+      const right = k === 2 ? false : ux >= 0;
+      const centered = k === 2 || Math.abs(ux) < 40;
+      const tx = centered ? px : px + (right ? chipR + 8 : -(chipR + 8));
+      const below = uy > 0;
+      const ty = centered ? (below ? py + chipR + 15 : py - chipR - 22) : py - 2;
+      const anchor = centered ? "middle" : right ? "start" : "end";
+      wrapLabel(n.m.lotName, 22).forEach((ln, li) => {
+        labels += `<text x="${tx}" y="${ty + li * 14}" text-anchor="${anchor}" font-size="11.5" font-weight="600" fill="${ink}">${esc(ln)}</text>`;
+      });
+    }
+  });
+  let circles = "";
+  nodes.forEach((n) => {
+    const c = coOf(n.m.company), isMe = n.m.company === (o.current || state.current);
+    circles += `<circle cx="${n.x}" cy="${n.y}" r="${nodeR}" fill="${c ? c.hue : "#555"}" stroke="${isMe ? "var(--clay)" : "var(--panel)"}" stroke-width="${isMe ? 3 : 2}"/>`;
+    circles += `<text x="${n.x}" y="${n.y + (compact ? 3.5 : 4.5)}" text-anchor="middle" font-size="${compact ? 10 : 12}" font-weight="650" fill="#fff">${esc(initials(n.m.companyName))}</text>`;
+    if (!o.noNames) {
+      // Side nodes of a 4-way ring: label sits outside the ring so it never crosses an arrow.
+      const side = k === 4 && Math.abs(n.y - cy) < 2 && !compact;
+      const lines = wrapLabel(n.m.companyName, side ? 12 : compact ? 15 : 22);
+      const above = k !== 2 && n.y < cy - 2;
+      lines.forEach((ln, li) => {
+        if (side) {
+          const left = n.x < cx, x = n.x + (left ? -(nodeR + 8) : nodeR + 8);
+          circles += `<text x="${x}" y="${n.y + 4 + (li - (lines.length - 1) / 2) * 13}" text-anchor="${left ? "end" : "start"}" font-size="12" fill="${sub}" font-weight="${isMe ? 650 : 500}">${esc(ln)}</text>`;
+          return;
+        }
+        const y = above ? n.y - nodeR - 8 - (lines.length - 1 - li) * 13 : n.y + nodeR + 15 + li * 13;
+        circles += `<text x="${n.x}" y="${y}" text-anchor="middle" font-size="${compact ? 10.5 : 12}" fill="${sub}" font-weight="${isMe ? 650 : 500}">${esc(ln)}</text>`;
+      });
+    }
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(item.members.map((m) => `${m.companyName} sends ${m.lotName} to ${m.toName}`).join(". "))}"><defs><marker id="${uid}a" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 .6L7.4 4L0 7.4Z" fill="${arrow}"/></marker></defs>${edges}${circles}${chips}${labels}</svg>`;
+}
+function hydrateGraphs() {
+  $$("[data-graph]").forEach((el) => {
+    const it = itemFor(el.dataset.graph);
+    if (!it) return;
+    const dark = el.dataset.tone === "dark";
+    el.innerHTML = exchangeGraph(it, Math.max(el.clientWidth || 300, 240), {
+      compact: el.dataset.size === "compact", height: el.dataset.h ? +el.dataset.h : undefined,
+      ink: dark ? "#fff" : undefined, sub: dark ? "#d6e2da" : undefined, arrow: dark ? "#9fd0b5" : undefined,
+    });
+  });
+}
+/** Open exchange snapshot if there is one, otherwise the live calculation. */
+function itemFor(sig) {
+  const ex = Engine.findExchange(state, sig) || state.exchanges.find((e) => e.sig === sig);
+  if (ex && (Engine.findExchange(state, sig) || !M.bySig.has(sig))) return Object.assign({}, ex.snapshot, { exchange: ex });
+  return M.bySig.get(sig) || null;
+}
+
+/* ---- Photos: resized in the browser and stored with the demo data ---- */
+function readPhoto(file) {
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onerror = () => reject(new Error("Could not read file"));
+    fr.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("Not a readable image"));
+      img.onload = () => {
+        const max = 560, r = Math.min(1, max / Math.max(img.width, img.height));
+        const cv = document.createElement("canvas");
+        cv.width = Math.round(img.width * r); cv.height = Math.round(img.height * r);
+        cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+        resolve(cv.toDataURL("image/jpeg", 0.72));
+      };
+      img.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  });
+}
+</script>
+<script>
+/* ===========================================================================
+ * Pages. Each returns HTML; interactions run through ACT (see ui-app.js).
+ * ======================================================================== */
+const statusPill = (s) => {
+  const cls = { completed: "ok", confirmed: "ok", swatch: "brand", pickup: "brand", delivered: "brand", proposed: "warn", declined: "bad", failed: "bad", superseded: "", invalidated: "" }[s] || "";
+  return `<span class="pill ${cls}">${esc(Engine.STAGE_LABEL[s] || s)}</span>`;
+};
+const SIM = `<span class="pill sim">Simulated</span>`;
+
+function lotCard(l, o = {}) {
+  const v = o.view, routes = v ? v.routes(l.id) : [];
+  const owner = coOf(l.owner);
+  const stat = l.status === "active" ? "" : `<span class="pill ${l.status === "reserved" ? "warn" : l.status === "exchanged" ? "ok" : ""}">${{ paused: "Paused", reserved: "Reserved in demo", exchanged: "Exchanged (simulated)" }[l.status] || l.status}</span>`;
+  return `<article class="lot" ${o.tour ? `data-tour="${o.tour}"` : ""}>
+    <div class="swatch" style="${swatchStyle(l)}">
+      <div class="corner">${stat}${o.badge || ""}</div>
+      ${l.photos && l.photos.length ? "" : `<span class="tagline">Generated swatch</span>`}
+    </div>
+    <div class="lot-body">
+      <div class="lot-title">${esc(l.name)}</div>
+      ${o.showOwner ? `<div class="who small muted">${monogram(owner, true)}<span>${esc(owner.name)}</span></div>` : ""}
+      <div class="small muted">${esc(Engine.compositionText(l.composition))}</div>
+      <div class="spec num"><span>${l.gsm} GSM</span><span>${l.width} cm wide</span><span>${l.qty.toLocaleString("en-US")} m</span><span>${esc(l.city)}</span></div>
+      <div class="small muted row" style="gap:5px"><span class="dot" style="background:${lotHex(l)}"></span>${esc(l.color || l.colorFamily)}</div>
+      ${o.extra || ""}
+      <div class="lot-foot"><b class="num">${won(l.value)}</b>${o.actions || ""}</div>
+    </div>
+  </article>`;
+}
+
+function routePill(rs) {
+  if (!rs.length) return `<span class="pill">No route yet</span>`;
+  const multi = rs.every((r) => r.k > 2);
+  return `<span class="pill ${multi ? "clay" : "brand"}">${plural(rs.length, "route")}${multi ? ", multi-way only" : ""}</span>`;
+}
+
+function exchangeCard(item, cid, o = {}) {
+  const ex = Engine.findExchange(state, item.sig);
+  const mine = item.members.find((m) => m.company === cid);
+  const badge = ex ? statusPill(ex.status) : item.declined ? `<span class="pill bad">Declined</span>` : item.recommended ? `<span class="pill ok">In recommended round</span>` : item.eligible ? `<span class="pill">Alternative route</span>` : `<span class="pill bad">Not feasible</span>`;
+  const hops = item.members.map((m) => {
+    const l = lotOf(m.lotId);
+    return `<span class="hop"><span class="sw" style="${l ? swatchStyle(l) : ""}"></span><span><b style="font-weight:600">${esc(m.lotName)}</b><br><span class="faint">${esc(m.companyName)}</span></span></span>`;
+  }).join(`<span class="arrow" aria-hidden="true">→</span>`);
+  return `<button class="ex" data-act="open-ex" data-sig="${esc(item.sig)}" ${o.tour ? `data-tour="${o.tour}"` : ""}>
+    <div style="min-width:0">
+      <div class="row"><b style="font-size:15px">${item.k}-way exchange</b>${badge}${item.regime !== "ntu" ? `<span class="pill sim">${esc(Engine.REGIMES[item.regime].label)}</span>` : ""}</div>
+      <div class="chain">${hops}<span class="arrow" aria-hidden="true">↺</span></div>
+      ${item.reason ? `<div class="small" style="color:var(--bad);margin-top:8px">${esc(item.reason)}</div>` : ""}
+    </div>
+    <div class="ex-side">
+      ${mine ? `<span class="small muted">Your gain if completed</span><span class="gain ${mine.gain < 0 ? "neg" : ""}">${signed(mine.gain)}</span>` : `<span class="small muted">Group gain if completed</span><span class="gain">${signed(item.surplus)}</span>`}
+      <span class="small faint">Logistics ${won(item.logistics)}</span>
+      <span class="small faint">Success chance ${Math.round(item.succ * 100)}%</span>
+    </div>
+  </button>`;
+}
+
+/* ---- 1. Dashboard ---- */
+function pageDashboard() {
+  const c = me(), v = Engine.companyView(state, M, c.id);
+  const allMine = state.lots.filter((l) => l.owner === c.id);
+  const active = allMine.filter((l) => l.status === "active");
+  const best = v.eligible.slice().sort((a, b) => (b.recommended - a.recommended) || (Engine.gainOf(b, c.id) - Engine.gainOf(a, c.id)))[0];
+  const openApprovals = state.exchanges.filter((e) => e.status === "proposed" && e.companies.includes(c.id) && !e.approvals[c.id]);
+  const liveEx = state.exchanges.filter((e) => ["confirmed", "swatch", "pickup", "delivered"].includes(e.status) && e.companies.includes(c.id));
+  const acts = state.activity.filter((a) => a.companies.includes(c.id)).slice(0, 5);
+  const top = v.eligible.slice().sort((a, b) => (b.recommended - a.recommended) || (Engine.gainOf(b, c.id) - Engine.gainOf(a, c.id))).slice(0, 3);
+  return `
+  <div class="page-head"><div><h1>${esc(c.name)}</h1><p>${esc(c.kind)}, ${esc(c.city)}. ${c.participating === false ? "Participation is paused, so your lots are out of the matching pool." : "Here is what your surplus could become."}</p></div>
+    <div class="row"><button class="btn" data-act="new-lot">Add a lot</button><button class="btn primary" data-go="matches">View matches</button></div></div>
+  <div class="stack">
+    ${best ? `<section class="hero" data-tour="hero">
+      <div><span class="pill">${best.k === 2 ? "Direct swap available" : `${best.k}-way circular exchange`}</span>
+        <h2>${esc(best.members.find((m) => m.company === c.id).lotName)} could become ${esc(best.members.find((m) => m.company === c.id).recvName)}</h2>
+        <p>${best.k > 2 ? `No direct partner is needed: ${best.k} companies each give one lot and receive one they asked for.` : "You and one other company each want what the other holds."} Estimated gain for you if completed: <b style="color:#fff">${signed(Engine.gainOf(best, c.id))}</b>.</p>
+        <div class="row" style="margin-top:14px"><button class="btn" data-act="open-ex" data-sig="${esc(best.sig)}">See who sends what</button></div></div>
+      <div class="graph" data-graph="${esc(best.sig)}" data-tone="dark" data-size="compact" data-h="230"></div>
+    </section>` : `<section class="card"><h2>No exchange route yet</h2><p class="muted" style="margin-top:6px">Nothing currently passes both the specification match and the economic test for ${esc(c.name)}. Widen a preference, or add a lot another company has asked for.</p>
+      <div class="row" style="margin-top:12px"><button class="btn primary" data-go="preferences">Review preferences</button><button class="btn" data-go="marketplace">Browse marketplace</button></div></section>`}
+    <div class="stats">
+      <div class="stat"><div class="lab">Lots in the pool</div><div class="val">${active.length}</div><div class="sub">${allMine.length - active.length} reserved, paused or exchanged</div></div>
+      <div class="stat"><div class="lab">Listed value in pool</div><div class="val">${won(active.reduce((s, l) => s + l.value, 0))}</div><div class="sub">Your own estimate</div></div>
+      <div class="stat"><div class="lab">Exchange routes</div><div class="val">${v.eligible.length}</div><div class="sub">${v.eligible.filter((i) => i.k > 2).length} are multi-way</div></div>
+      <div class="stat" ${openApprovals.length ? "" : ""}><div class="lab">Awaiting your approval</div><div class="val">${openApprovals.length}</div><div class="sub">${liveEx.length} exchanges in progress (simulated)</div></div>
+    </div>
+    <div class="grid-main">
+      <section class="stack" style="min-width:0">
+        <div class="between"><h2>Potential matches</h2><button class="btn ghost" data-go="matches">All matches →</button></div>
+        ${top.length ? top.map((i) => exchangeCard(i, c.id)).join("") : `<div class="empty"><h3>No routes for ${esc(c.name)} right now</h3><p class="small">${v.blocked.length ? `${plural(v.blocked.length, "compatible exchange")} failed the economic test. See Exchange Matches for the reasons.` : "No other company has asked for these lots yet."}</p></div>`}
+      </section>
+      <aside class="stack" style="min-width:0">
+        <div class="card"><div class="between"><h3>Your lots</h3><button class="btn ghost sm" data-go="inventory">Manage</button></div>
+          <div style="margin-top:8px">${active.slice(0, 5).map((l) => {
+            const r = v.routes(l.id);
+            return `<div class="row" style="padding:7px 0;border-top:1px solid var(--line);flex-wrap:nowrap"><span class="sw" style="${swatchStyle(l)};width:36px;height:36px;border-radius:7px;flex:none"></span><div style="min-width:0;flex:1"><div class="small" style="font-weight:600">${esc(l.name)}</div><div>${routePill(r)}</div></div></div>`;
+          }).join("") || `<p class="small muted">No lots in the pool.</p>`}</div></div>
+        <div class="card"><div class="between"><h3>Recent activity</h3><button class="btn ghost sm" data-go="activity">All</button></div>
+          <div style="margin-top:6px">${acts.map((a) => `<div style="padding:7px 0;border-top:1px solid var(--line)" class="small"><div>${esc(a.text)}</div><div class="faint">${ago(a.at)} · simulated</div></div>`).join("") || `<p class="small muted">Nothing yet. Open an exchange to start the simulated approval flow.</p>`}</div></div>
+      </aside>
+    </div>
+  </div>`;
+}
+
+/* ---- 2. My Inventory ---- */
+function pageInventory() {
+  const c = me(), v = Engine.companyView(state, M, c.id);
+  const all = state.lots.filter((l) => l.owner === c.id);
+  const f = ui.invFilter;
+  const shown = all.filter((l) => f === "all" || (f === "active" ? l.status === "active" : l.status !== "active"));
+  return `
+  <div class="page-head"><div><h1>My Inventory</h1><p>Surplus lots ${esc(c.name)} is willing to exchange. Every change recalculates the matches.</p></div>
+    <button class="btn primary" data-act="new-lot" data-tour="add-lot">Add a lot</button></div>
+  <div class="row" style="margin-bottom:14px"><div class="seg" role="group" aria-label="Filter lots">${[["active", "In pool"], ["other", "Reserved, paused, exchanged"], ["all", "All"]].map(([k, l]) => `<button data-act="inv-filter" data-v="${k}" aria-pressed="${f === k}">${l}</button>`).join("")}</div></div>
+  ${shown.length ? `<div class="lot-grid">${shown.map((l) => {
+    const locked = Engine.lotLockedBy(state, l.id);
+    const routes = v.routes(l.id);
+    return lotCard(l, {
+      view: v, tour: l.id,
+      extra: l.status === "active" ? `<div>${routePill(routes)}</div>` : "",
+      actions: l.status === "exchanged" ? "" : `<span class="row" style="gap:3px">
+        ${locked ? `<button class="btn ghost sm" data-act="open-ex" data-sig="${esc(locked.sig)}">View exchange</button>` : `<button class="btn ghost sm" data-act="edit-lot" data-id="${l.id}">Edit</button>
+        <button class="btn ghost sm" data-act="toggle-pause" data-id="${l.id}">${l.status === "paused" ? "Resume" : "Pause"}</button>
+        <button class="btn ghost sm" data-act="remove-lot" data-id="${l.id}" aria-label="Remove ${esc(l.name)}">Remove</button>`}</span>`,
+    });
+  }).join("")}</div>` : `<div class="empty"><h3>Nothing here</h3><p class="small">Add a lot to see which exchanges it unlocks.</p></div>`}`;
+}
+
+function lotForm() {
+  const d = ui.drawer, l = d.draft, e = d.errors || {};
+  const fld = (name, label, input, hint) => `<div class="field ${name === "name" || name === "note" || name === "composition" ? "full" : ""}"><label for="f-${name}">${label}</label>${input}${hint ? `<span class="hint">${hint}</span>` : ""}${e[name] ? `<span class="err" role="alert">${esc(e[name])}</span>` : ""}</div>`;
+  const txt = (name, val, extra = "") => `<input id="f-${name}" name="${name}" type="text" value="${esc(val ?? "")}" ${extra}>`;
+  const numb = (name, val, extra = "") => `<input id="f-${name}" name="${name}" type="number" value="${esc(val ?? "")}" ${extra}>`;
+  const sel = (name, val, opts) => `<select id="f-${name}" name="${name}">${opts.map((o) => `<option ${o === val ? "selected" : ""}>${esc(o)}</option>`).join("")}</select>`;
+  return `<form id="lot-form" class="form-grid" novalidate>
+    ${fld("name", "Textile name", txt("name", l.name, 'placeholder="e.g. Washed Indigo Selvedge Denim"'))}
+    ${fld("category", "Material category", sel("category", l.category, Engine.CATEGORIES))}
+    ${fld("city", "Location", sel("city", l.city, Object.keys(Engine.CITIES)), "Used for the logistics estimate")}
+    ${fld("composition", "Composition", txt("composition", l.compositionText, 'placeholder="98% cotton, 2% elastane"'), `Must add up to 100%. Fibers: ${Engine.FIBERS.join(", ")}.`)}
+    ${fld("gsm", "Weight (GSM)", numb("gsm", l.gsm, 'min="1"'))}
+    ${fld("width", "Width (cm)", numb("width", l.width, 'min="1"'))}
+    ${fld("colorFamily", "Color family", sel("colorFamily", l.colorFamily, Object.keys(Engine.COLORS)))}
+    ${fld("color", "Color name", txt("color", l.color, 'placeholder="Optional"'))}
+    ${fld("qty", "Quantity (m)", numb("qty", l.qty, 'min="1"'), "Whole lots only: splitting is not modelled")}
+    ${fld("value", "Estimated value (KRW)", numb("value", l.value, 'min="1" step="10000"'), "Your own estimate, not a verified price")}
+    ${fld("outsidePct", "Fallback value (%)", numb("outsidePct", Math.round((l.outsidePct ?? 0.5) * 100), 'min="0" max="100"'), "What you could recover another way, as % of estimated value. You give this up by exchanging.")}
+    <div class="field"><span class="lab">Certifications (self-declared)</span><div class="row">${Engine.CERTS.map((x) => `<label class="small row" style="gap:4px"><input type="checkbox" name="cert" value="${x}" ${(l.certs || []).includes(x) ? "checked" : ""}>${x}</label>`).join("")}</div></div>
+    ${fld("note", "Notes", `<textarea id="f-note" name="note">${esc(l.note || "")}</textarea>`)}
+    <div class="field full"><span class="lab">Photos</span><div class="photo-row">${(l.photos || []).map((p, i) => `<div class="photo" style="background-image:url('${p}')"><button type="button" data-act="rm-photo" data-i="${i}" aria-label="Remove photo">×</button></div>`).join("")}
+      ${(l.photos || []).length < 3 ? `<label class="btn sm" style="height:74px;width:74px;white-space:normal;text-align:center">Add photo<input type="file" accept="image/*" id="photo-in" hidden></label>` : ""}</div>
+      <span class="hint">Up to 3. Resized and kept in this browser only. Without a photo the card shows a generated swatch.</span>${e.photos ? `<span class="err">${esc(e.photos)}</span>` : ""}</div>
+  </form>`;
+}
+
+/* ---- 3. My Preferences ---- */
+function chipSet(pid, field, options, selected) {
+  return `<div class="chips">${options.map((o) => `<button type="button" class="chip" data-act="pf-chip" data-pid="${pid}" data-field="${field}" data-v="${esc(o)}" aria-pressed="${(selected || []).includes(o)}">${esc(o)}</button>`).join("")}</div>`;
+}
+function pagePreferences() {
+  const c = me(), v = Engine.companyView(state, M, c.id);
+  const others = state.lots.filter((l) => l.owner !== c.id && l.status === "active");
+  const accepted = others.filter((l) => Engine.assess(c, l).accepted);
+  const wish = Object.entries(c.overrides || {});
+  const profile = (p) => {
+    const count = others.filter((l) => Engine.checkProfile(c, p, l).pass).length;
+    const n = (field, label, val, hint, extra = "") => `<div class="field"><label for="pf-${p.id}-${field}">${label}</label><input id="pf-${p.id}-${field}" type="number" data-pf="${field}" data-pid="${p.id}" value="${val ?? ""}" ${extra}>${hint ? `<span class="hint">${hint}</span>` : ""}</div>`;
+    return `<section class="card">
+      <div class="between"><div class="row" style="flex:1;min-width:200px"><input type="text" id="pf-${p.id}-name" data-pf="name" data-pid="${p.id}" value="${esc(p.name)}" aria-label="Profile name" style="font-weight:600;max-width:320px"><span class="pill ${count ? "ok" : ""}">${plural(count, "lot")} fit today</span></div>
+      <button class="btn ghost sm" data-act="pf-remove" data-pid="${p.id}">Remove</button></div>
+      <div class="stack" style="gap:12px;margin-top:12px">
+        <div class="field"><span class="lab small" style="font-weight:550;color:var(--ink-2)">Acceptable material categories</span>${chipSet(p.id, "categories", Engine.CATEGORIES, p.categories)}<span class="hint">None selected means any category.</span></div>
+        <div class="form-grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr))">
+          <div class="field"><label for="pf-${p.id}-fiber">Must contain fiber</label><select id="pf-${p.id}-fiber" data-pf="fiber" data-pid="${p.id}"><option value="">Any</option>${Engine.FIBERS.map((f) => `<option ${p.fiberMin && p.fiberMin.fiber === f ? "selected" : ""}>${f}</option>`).join("")}</select></div>
+          ${n("fibermin", "At least (%)", p.fiberMin ? p.fiberMin.min : "", "", 'min="0" max="100"')}
+          ${n("gsmMin", "GSM from", p.gsmMin)}${n("gsmMax", "GSM to", p.gsmMax)}
+          ${n("widthMin", "Minimum width (cm)", p.widthMin)}${n("qtyMin", "Minimum quantity (m)", p.qtyMin)}${n("maxKm", "Maximum distance (km)", p.maxKm)}
+          ${n("valueFactor", "Value factor", p.valueFactor, "1.0 means you value a fit at its listed estimate", 'min="0.1" max="2" step="0.05"')}
+        </div>
+        <div class="field"><span class="lab small" style="font-weight:550;color:var(--ink-2)">Exclude fibers</span>${chipSet(p.id, "excludeFibers", Engine.FIBERS, p.excludeFibers)}</div>
+        <div class="field"><span class="lab small" style="font-weight:550;color:var(--ink-2)">Required colors</span>${chipSet(p.id, "colors", Object.keys(Engine.COLORS), p.colors)}<span class="hint">None selected means any color.</span></div>
+        <details><summary>More options</summary><div class="stack" style="gap:10px">
+          <div class="field"><span class="lab small" style="font-weight:550;color:var(--ink-2)">Preferred colors</span>${chipSet(p.id, "preferColors", Object.keys(Engine.COLORS), p.preferColors)}<span class="hint">Not a requirement. Other colors are valued 10% lower (prototype assumption).</span></div>
+          <div class="field"><span class="lab small" style="font-weight:550;color:var(--ink-2)">Required certifications (self-declared)</span>${chipSet(p.id, "certs", Engine.CERTS, p.certs)}</div>
+        </div></details>
+      </div></section>`;
+  };
+  return `
+  <div class="page-head"><div><h1>My Preferences</h1><p>Say what ${esc(c.name)} would accept. A lot qualifies when it meets every requirement in at least one profile.</p></div>
+    <button class="btn primary" data-act="pf-add">Add a profile</button></div>
+  <div class="stats" style="margin-bottom:16px">
+    <div class="stat"><div class="lab">Lots you would accept</div><div class="val">${accepted.length}</div><div class="sub">Of ${others.length} from other companies</div></div>
+    <div class="stat"><div class="lab">Exchange routes</div><div class="val">${v.eligible.length}</div><div class="sub">After the economic test</div></div>
+    <div class="stat"><div class="lab">Compatible but not feasible</div><div class="val">${v.blocked.length}</div><div class="sub">Specifications match, gains do not</div></div>
+  </div>
+  <div class="grid-main">
+    <div class="stack" data-tour="profiles" style="min-width:0">${(c.profiles || []).map(profile).join("") || `<div class="empty"><h3>No profiles</h3><p class="small">Without a profile you only accept lots on your wishlist.</p></div>`}</div>
+    <aside class="stack" style="min-width:0">
+      <section class="card"><h3>Participation</h3>
+        <label class="row small" style="margin-top:8px;flex-wrap:nowrap"><input type="checkbox" data-act="toggle-part" ${c.participating === false ? "" : "checked"}><span>Include ${esc(c.name)} in matching</span></label>
+        <div class="field" style="margin-top:12px"><label for="co-hurdle">Minimum gain to approve (KRW)</label><input id="co-hurdle" type="number" step="10000" min="0" data-co="hurdle" value="${c.hurdle || 0}"><span class="hint">Used when this company is simulated: it approves if its gain clears this amount.</span></div>
+        <div class="field" style="margin-top:12px"><label for="co-wish">Wishlist value factor</label><input id="co-wish" type="number" step="0.05" min="0.1" max="2" data-co="wishFactor" value="${c.wishFactor ?? 0.9}"><span class="hint">Applied to lots you add by hand from the Marketplace.</span></div>
+      </section>
+      <section class="card"><h3>Manual choices</h3><p class="small muted">Added from the Marketplace. Wishlist items are accepted even if no profile covers them.</p>
+        <div style="margin-top:8px">${wish.map(([id, kind]) => { const l = lotOf(id); return l ? `<div class="between small" style="padding:6px 0;border-top:1px solid var(--line)"><span>${esc(l.name)} <span class="pill ${kind === "accept" ? "ok" : "bad"}">${kind === "accept" ? "Wishlist" : "Not for us"}</span></span><button class="btn ghost sm" data-act="clear-override" data-id="${id}">Clear</button></div>` : ""; }).join("") || `<p class="small faint">None yet.</p>`}</div>
+      </section>
+      <div class="note"><b>Value factor is your statement, not a measurement.</b> The value a lot has to you is estimated as listed value × your value factor. It replaces the random draw in the research model and has not been calibrated against real trades.</div>
+    </aside>
+  </div>`;
+}
+
+/* ---- 4. Marketplace ---- */
+function pageMarketplace() {
+  const c = me(), f = ui.mp;
+  const v = Engine.companyView(state, M, c.id);
+  const num = (x) => (x === "" ? null : Number(x));
+  const pool = state.lots.filter((l) => l.owner !== c.id && l.status === "active");
+  const rows = pool.map((l) => ({ l, a: Engine.assess(c, l) })).filter(({ l, a }) => {
+    const q = f.q.trim().toLowerCase();
+    if (q && !`${l.name} ${l.category} ${coOf(l.owner).name} ${l.color}`.toLowerCase().includes(q)) return false;
+    if (f.cat !== "all" && l.category !== f.cat) return false;
+    if (f.fiber !== "all" && !l.composition[f.fiber]) return false;
+    if (f.city !== "all" && l.city !== f.city) return false;
+    if (f.color !== "all" && l.colorFamily !== f.color) return false;
+    if (num(f.gsmMin) != null && l.gsm < num(f.gsmMin)) return false;
+    if (num(f.gsmMax) != null && l.gsm > num(f.gsmMax)) return false;
+    if (num(f.qtyMin) != null && l.qty < num(f.qtyMin)) return false;
+    if (f.fit === "fit" && !a.accepted) return false;
+    return true;
+  }).sort((x, y) => y.a.accepted - x.a.accepted);
+  const sel = (key, label, opts) => `<div class="field" style="min-width:128px;flex:1"><label for="mp-${key}">${label}</label><select id="mp-${key}" data-mp="${key}"><option value="all">All</option>${opts.map((o) => `<option ${f[key] === o ? "selected" : ""}>${esc(o)}</option>`).join("")}</select></div>`;
+  const numF = (key, label) => `<div class="field" style="width:96px"><label for="mp-${key}">${label}</label><input id="mp-${key}" type="number" data-mp="${key}" value="${esc(f[key])}"></div>`;
+  return `
+  <div class="page-head"><div><h1>Marketplace</h1><p>Lots other companies have made available for exchange. Nothing here is for sale: lots move through approved exchanges.</p></div></div>
+  <section class="card flat" style="margin-bottom:16px">
+    <div class="row" style="align-items:flex-end;gap:10px">
+      <div class="field" style="flex:2;min-width:180px"><label for="mp-q">Search</label><input id="mp-q" type="search" data-mp="q" value="${esc(f.q)}" placeholder="Fabric, company or color"></div>
+      ${sel("cat", "Category", Engine.CATEGORIES)}${sel("fiber", "Contains fiber", Engine.FIBERS)}${sel("city", "Location", Object.keys(Engine.CITIES))}${sel("color", "Color", Object.keys(Engine.COLORS))}
+      ${numF("gsmMin", "GSM from")}${numF("gsmMax", "GSM to")}${numF("qtyMin", "Min. m")}
+    </div>
+    <div class="between" style="margin-top:12px"><div class="seg" role="group" aria-label="Fit filter"><button data-act="mp-fit" data-v="all" aria-pressed="${f.fit === "all"}">All lots</button><button data-act="mp-fit" data-v="fit" aria-pressed="${f.fit === "fit"}">Fits ${esc(c.name)}</button></div>
+    <span class="row"><span class="small muted">${plural(rows.length, "lot")}</span><button class="btn ghost sm" data-act="mp-clear">Clear filters</button></span></div>
+  </section>
+  ${rows.length ? `<div class="lot-grid">${rows.map(({ l, a }) => {
+    const miss = !a.accepted ? Engine.closestMiss(a) : null;
+    const override = (c.overrides || {})[l.id];
+    const rs = M.items.filter((i) => i.eligible && !i.declined && i.lots.includes(l.id) && i.companies.includes(c.id));
+    const fit = a.accepted ? `<span class="pill ok">${a.source === "wishlist" ? "On your wishlist" : "Fits your preferences"}</span>` : override === "reject" ? `<span class="pill bad">Not for us</span>` : `<span class="pill">Outside your preferences</span>`;
+    const whyNot = miss && miss.failed.length ? `<div class="small faint">${esc(miss.failed[0].label)}: ${esc(miss.failed[0].detail)}</div>` : "";
+    return lotCard(l, {
+      showOwner: true,
+      extra: `<div class="row">${fit}${rs.length ? `<span class="pill brand">${plural(rs.length, "route")}</span>` : ""}</div>${whyNot}`,
+      actions: `<span class="row" style="gap:3px"><button class="btn ghost sm" data-act="view-lot" data-id="${l.id}">Details</button>${a.source === "profile" ? "" : override === "accept" ? `<button class="btn ghost sm" data-act="set-override" data-id="${l.id}" data-v="">Unlist</button>` : `<button class="btn sm" data-act="set-override" data-id="${l.id}" data-v="accept">Wishlist</button>`}</span>`,
+    });
+  }).join("")}</div>` : `<div class="empty"><h3>No lots match these filters</h3><button class="btn sm" data-act="mp-clear" style="margin-top:6px">Clear filters</button></div>`}`;
+  void v;
+}
+
+function lotDetail(l) {
+  const c = me(), a = Engine.assess(c, l), owner = coOf(l.owner);
+  const list = a.source === "own" ? [] : (a.profiles || []);
+  return `<div class="swatch" style="${swatchStyle(l)};height:190px;border-radius:12px"></div>
+    <div class="who" style="margin:14px 0 4px">${monogram(owner)}<div><b>${esc(owner.name)}</b><div class="small muted">${esc(owner.kind)}, ${esc(owner.city)}</div></div></div>
+    <div class="tw" style="margin-top:10px"><table><tbody>
+      ${[["Composition", Engine.compositionText(l.composition)], ["Category", l.category], ["Weight", l.gsm + " GSM"], ["Width", l.width + " cm"], ["Color", l.color || l.colorFamily], ["Quantity", l.qty.toLocaleString("en-US") + " m (about " + Math.round(Engine.lotKg(l)) + " kg)"], ["Location", l.city], ["Estimated value", won(l.value) + " (owner's estimate)"], ["Certifications", (l.certs || []).length ? l.certs.join(", ") + " (self-declared, not verified)" : "None declared"]].map(([k, v]) => `<tr><td class="faint" style="width:40%">${k}</td><td>${esc(v)}</td></tr>`).join("")}
+    </tbody></table></div>
+    ${l.note ? `<p class="small muted" style="margin-top:10px">${esc(l.note)}</p>` : ""}
+    ${l.photos && l.photos.length > 1 ? `<div class="photo-row" style="margin-top:10px">${l.photos.map((p) => `<div class="photo" style="background-image:url('${p}')"></div>`).join("")}</div>` : ""}
+    ${a.source === "own" ? "" : `<h3 style="margin:18px 0 6px">Against ${esc(c.name)}'s preferences</h3>
+    ${a.accepted ? `<div class="note ok"><b>${a.source === "wishlist" ? "Accepted through your wishlist." : `Fits "${esc(a.profile.name)}".`}</b> Estimated value to you: ${won(a.W)}.</div>` : `<div class="note">This lot does not meet any of your profiles yet.</div>`}
+    ${list.map((r) => `<div style="margin-top:10px"><div class="small" style="font-weight:600">${esc(r.profile.name)}</div>${r.checks.map((x) => `<div class="check"><span class="tick ${x.pass ? "y" : "n"}">${x.pass ? "✓" : "×"}</span><span><b style="font-weight:550">${esc(x.label)}</b> <span class="muted">${esc(x.detail)}</span></span></div>`).join("")}</div>`).join("")}`}`;
+}
+
+/* ---- Matching rules (shared) ---- */
+function rulesPanel() {
+  const s = state.settings;
+  const nf = (key, label, val, step, hint) => `<div class="field"><label for="r-${key}">${label}</label><input id="r-${key}" type="number" step="${step}" data-rule="${key}" value="${val}">${hint ? `<span class="hint">${hint}</span>` : ""}</div>`;
+  return `<section class="card flat">
+    <div class="between"><div class="row"><span class="small muted">Largest exchange</span><div class="seg" role="group" aria-label="Largest exchange">${[2, 3, 4].map((n) => `<button data-act="set-L" data-v="${n}" aria-pressed="${s.L === n}">${n}-way</button>`).join("")}</div>
+      <span class="small muted" style="margin-left:6px">Rule</span><div class="seg" role="group" aria-label="Exchange rule">${Object.entries(Engine.REGIMES).map(([k, r]) => `<button data-act="set-regime" data-v="${k}" aria-pressed="${s.regime === k}">${esc(r.label)}</button>`).join("")}</div></div>
+      <button class="btn ghost sm" data-act="toggle-rules">${ui.rulesOpen ? "Hide assumptions" : "Edit assumptions"}</button></div>
+    ${s.regime !== "ntu" ? `<div class="note warn" style="margin-top:10px"><b>Not a payment or settlement system.</b> ${esc(Engine.REGIMES[s.regime].note)} No money or credit is created or moved here.</div>` : ""}
+    ${ui.rulesOpen ? `<div class="form-grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-top:12px">
+      ${nf("c_fixed", "Fixed cost per shipment (KRW)", s.c_fixed, 5000, "Packing and handling")}
+      ${nf("c_km", "KRW per km per 50 kg", s.c_km, 10, "")}
+      ${nf("cost_scale", "Logistics multiplier", s.cost_scale, 0.5, "")}
+      ${nf("p_fail", "Dropout risk per company", s.p_fail, 0.01, "An exchange of k companies succeeds with (1-risk)^k")}
+      ${nf("fail_cost_share", "Sunk share if it fails", s.fail_cost_share, 0.05, "")}
+      ${s.regime === "credit_list" ? nf("credit_discount", "Simulated credit rate", s.credit_discount, 0.05, "") : ""}
+    </div><p class="small faint" style="margin-top:8px">Assumed defaults carried over from the research model. None are market data.</p>` : ""}
+  </section>`;
+}
+
+/* ---- 5. Exchange Matches ---- */
+function pageMatches() {
+  const c = me(), s = state.settings, v = Engine.companyView(state, M, c.id);
+  const packs = M.packs;
+  const totalLots = M.lots.length;
+  const mineIn = (L) => packs[L].selected.filter((x) => x.companies.includes(c.id)).length;
+  const scope = ui.matchScope;
+  const base = scope === "mine" ? v.eligible : M.pool.filter((i) => i.k <= s.L);
+  const k = ui.matchK;
+  const list = base.filter((i) => k === "all" || i.k === +k).slice().sort((a, b) => (b.recommended - a.recommended) || (scope === "mine" ? Engine.gainOf(b, c.id) - Engine.gainOf(a, c.id) : b.w - a.w));
+  const blocked = (scope === "mine" ? v.blocked : M.items.filter((i) => !i.eligible && !i.declined && i.k <= s.L));
+  const declined = M.items.filter((i) => i.declined && (scope !== "mine" || i.companies.includes(c.id)));
+  const counts = { 2: 0, 3: 0, 4: 0 };
+  base.forEach((i) => counts[i.k]++);
+  const guided = list.find((i) => i.sig === "L01>L03>L05") ? "L01>L03>L05" : null;
+  return `
+  <div class="page-head"><div><h1>Exchange Matches</h1><p>Calculated live from every company's lots and preferences. The recommended round is the set of non-overlapping exchanges with the highest total expected gain.</p></div></div>
+  <div class="stack">
+    <div class="grid2" data-tour="compare">
+      <section class="card"><h3>What multi-way adds</h3><p class="small muted">Lots that can move across all companies, under the current rule.</p>
+        <div class="bars" style="margin-top:12px">${[2, 3, 4].map((L) => {
+          const moved = packs[L].selected.reduce((sum, x) => sum + x.k, 0);
+          return `<div class="bar-row"><span>${L === 2 ? "Direct swaps only" : `Up to ${L}-way`}</span><div class="bar-track"><div class="bar-fill" style="width:${totalLots ? (moved / totalLots) * 100 : 0}%"></div></div><b class="num" style="text-align:right">${moved} of ${totalLots}</b></div>`;
+        }).join("")}</div></section>
+      <section class="card"><h3>For ${esc(c.name)}</h3>
+        <div class="row" style="gap:22px;margin-top:8px">
+          <div><div class="stat-v" style="font:500 26px var(--serif)">${v.eligible.length}</div><div class="small muted">Routes found</div></div>
+          <div><div class="stat-v" style="font:500 26px var(--serif)">${mineIn(s.L)}</div><div class="small muted">In recommended round</div></div>
+          <div><div class="stat-v" style="font:500 26px var(--serif)">${v.onlyMultiWay.length}</div><div class="small muted">Lots only multi-way can move</div></div>
+        </div>
+        ${v.onlyMultiWay.length ? `<p class="small muted" style="margin-top:10px">${esc(v.onlyMultiWay[0].name)}${v.onlyMultiWay.length > 1 ? ` and ${v.onlyMultiWay.length - 1} more have` : " has"} no workable direct swap, but ${v.onlyMultiWay.length > 1 ? "can" : "can"} move through a cycle.</p>` : ""}
+      </section>
+    </div>
+    ${rulesPanel()}
+    <div class="between">
+      <div class="row">
+        <div class="seg" role="group" aria-label="Scope"><button data-act="match-scope" data-v="mine" aria-pressed="${scope === "mine"}">${esc(c.name)}</button><button data-act="match-scope" data-v="all" aria-pressed="${scope === "all"}">All companies</button></div>
+        <div class="seg" role="group" aria-label="Exchange size"><button data-act="match-k" data-v="all" aria-pressed="${k === "all"}">All</button>${[2, 3, 4].filter((n) => n <= s.L).map((n) => `<button data-act="match-k" data-v="${n}" aria-pressed="${k === String(n)}">${n}-way (${counts[n]})</button>`).join("")}</div>
+      </div>
+      ${M.audit.pass ? `<span class="pill ok">✓ ${plural(M.audit.checked, "recommended exchange")} passed the constraint check</span>` : `<span class="pill bad">Constraint check failed</span>`}
+    </div>
+    ${list.length ? list.map((i) => exchangeCard(i, c.id, { tour: i.sig === guided ? "guided-card" : null })).join("") : `<div class="empty"><h3>No routes at this setting</h3><p class="small">Try a larger exchange size, widen your preferences, or add a lot from My Inventory.</p></div>`}
+    ${blocked.length ? `<details class="card flat" ${ui.showBlocked ? "open" : ""}><summary>Compatible, but not economically feasible (${blocked.length})</summary><p class="small muted">Specifications match for every hop, but at least one participant would lose under the current rule. These are not offered.</p><div class="stack" style="gap:10px;margin-top:10px">${blocked.map((i) => exchangeCard(i, c.id)).join("")}</div></details>` : ""}
+    ${declined.length ? `<details class="card flat"><summary>Declined (${declined.length})</summary><div class="stack" style="gap:8px;margin-top:8px">${declined.map((i) => `<div class="between small"><span>${esc(i.members.map((m) => m.lotName).join(" → "))}</span><button class="btn ghost sm" data-act="reopen" data-sig="${esc(i.sig)}">Allow again</button></div>`).join("")}</div></details>` : ""}
+  </div>`;
+}
+
+/* ---- 6. Exchange Details ---- */
+function pageExchange() {
+  const sig = ui.sig, it = itemFor(sig), c = me();
+  if (!it) return `<div class="empty"><h3>This exchange is no longer available</h3><p class="small">Inventory or preferences changed, so it no longer exists.</p><button class="btn" data-go="matches" style="margin-top:8px">Back to matches</button></div>`;
+  const ex = Engine.findExchange(state, sig) || (it.exchange || null);
+  const live = ex && Engine.findExchange(state, sig);
+  const mine = it.members.find((m) => m.company === c.id);
+  const regime = it.regime;
+  const direct = Engine.directSwapAnalysis(state, it);
+  const stages = ["proposed", "confirmed", "swatch", "pickup", "delivered", "completed"];
+  const at = ex ? stages.indexOf(ex.status) : -1;
+  const steps = it.members.map((m) => {
+    const l = lotOf(m.lotId);
+    return `<div class="flow-step"><div class="sw" style="${l ? swatchStyle(l) : "background:#d9d5ca"}"></div>
+      <div style="min-width:0"><div style="font-weight:600">${esc(m.lotName)}</div>
+      <div class="small muted">${esc(m.companyName)} sends to <b style="font-weight:600;color:var(--ink)">${esc(m.toName)}</b></div>
+      <div class="small faint">${esc(m.fromCity)} → ${esc(m.toCity)}, ${Math.round(m.km)} km, about ${Math.round(m.kg)} kg</div></div>
+      <div class="end small num" style="text-align:right"><b>${won(m.C)}</b><div class="faint">logistics</div></div></div>`;
+  }).join("");
+  const creditCols = regime === "credit_list";
+  const table = `<div class="tw"><table><thead><tr><th>Company</th><th>Receives</th><th class="r">Value to them</th><th class="r">Gives up</th><th class="r">Logistics</th><th class="r">Net gain</th>${creditCols ? `<th class="r">Simulated credit</th><th class="r">After credit</th>` : ""}${regime === "credit_surplus" ? `<th class="r">Equal share (idealized)</th>` : ""}</tr></thead><tbody>
+    ${it.members.map((m) => `<tr ${m.company === c.id ? 'style="background:var(--clay-soft)"' : ""}><td style="font-weight:550">${esc(m.companyName)}</td><td>${esc(m.recvName)}<div class="small faint">${m.source === "wishlist" ? "Wishlist" : esc(m.profileName || "")}, factor ${m.factor}${m.soft !== 1 ? `, color ×${m.soft}` : ""}</div></td>
+      <td class="r">${won(m.W)}</td><td class="r">${won(m.S)}</td><td class="r">${won(m.C)}</td><td class="r ${m.net < 0 ? "neg" : "pos"}">${signed(m.net)}</td>
+      ${creditCols ? `<td class="r">${m.credit > 0 ? "pays " + won(m.credit) : "gets " + won(state.settings.credit_discount * -m.credit)}</td><td class="r ${m.net2 < 0 ? "neg" : "pos"}">${signed(m.net2)}</td>` : ""}
+      ${regime === "credit_surplus" ? `<td class="r">${signed(m.gain)}</td>` : ""}</tr>`).join("")}
+  </tbody></table></div>`;
+  const allGain = regime === "credit_surplus" ? it.surplus >= 0 : it.members.every((m) => m.gain >= 0);
+  const feas = [
+    ["Every recipient asked for what it receives", true, "Each lot meets a preference profile or wishlist entry."],
+    ["No company appears twice and no lot is used twice", new Set(it.lots).size === it.k && new Set(it.companies).size === it.k, "Checked on every calculation."],
+    [regime === "credit_surplus" ? "The group gains overall" : "Every company gains", allGain, regime === "ntu" ? "After logistics and what each gives up." : "After simulated credits or idealized sharing."],
+    ["Expected gain stays positive after failure risk", it.w > 0, `Expected ${won(it.w)} at ${Math.round(it.succ * 100)}% success, with ${won(it.failCost)} sunk if it fails.`],
+  ];
+  const approvals = it.companies.map((id) => {
+    const co = coOf(id), st = ex ? ex.approvals[id] : null;
+    return `<div class="between" style="padding:7px 0;border-top:1px solid var(--line)"><span class="who">${monogram(co, true)}<span class="small" style="font-weight:${id === c.id ? 650 : 500}">${esc(co.name)}</span></span><span class="pill ${st === "approved" ? "ok" : st === "declined" ? "bad" : ""}">${st === "approved" ? "✓ Approved" : st === "declined" ? "× Declined" : "Pending"}</span></div>`;
+  }).join("");
+  const canAct = it.eligible !== false && mine && !it.declined;
+  const myState = ex ? ex.approvals[c.id] : null;
+  const isProposed = !ex || (live && ex.status === "proposed");
+  return `
+  <button class="btn ghost" data-go="matches" style="margin:-6px 0 8px -8px">← Exchange Matches</button>
+  <div class="page-head"><div><div class="row"><h1>${it.k}-way exchange</h1>${ex ? statusPill(ex.status) : it.eligible ? `<span class="pill ${it.recommended ? "ok" : ""}">${it.recommended ? "In recommended round" : "Alternative route"}</span>` : `<span class="pill bad">Not feasible</span>`}${SIM}</div>
+    <p>${it.k === 2 ? "Two companies swap directly." : `${it.k} companies each give one lot and receive one they asked for. Nobody needs a direct partner.`}</p></div></div>
+  ${it.eligible === false ? `<div class="note warn" style="margin-bottom:16px"><b>Not offered.</b> ${esc(it.reason)}</div>` : ""}
+  ${regime !== "ntu" ? `<div class="note warn" style="margin-bottom:16px"><b>Not a payment or settlement system.</b> ${esc(Engine.REGIMES[regime].note)}</div>` : ""}
+  <div class="grid-main">
+    <div class="stack" style="min-width:0">
+      <section class="card" data-tour="graph"><h2>Who sends what to whom</h2><div class="graph" data-graph="${esc(sig)}" style="margin:8px 0"></div><div>${steps}</div></section>
+      ${it.k > 2 ? `<section class="card" data-tour="why"><h2>Why this cannot be a direct swap</h2><p class="small muted" style="margin:3px 0 8px">A direct swap needs both sides to want each other's lot. For each pair in this loop, that test is shown below.</p>
+        ${direct.map((d) => `<div class="check"><span class="tick ${d.accepted ? "y" : "n"}">${d.accepted ? "✓" : "×"}</span><span><b style="font-weight:600">${esc(d.to)}</b> wants ${esc(d.lotName)}, but <b style="font-weight:600">${esc(d.from)}</b> ${d.accepted ? `would also accept ${esc(d.backName)}` : `does not want ${esc(d.backName)}`}${d.why ? `<div class="small faint">${esc(d.why)}</div>` : ""}</span></div>`).join("")}</section>` : ""}
+      <section class="card" data-tour="econ"><h2>Economic feasibility</h2><p class="small muted" style="margin:3px 0 10px">Net gain = value to them − what they give up − logistics they pay. All figures are estimates from stated assumptions.</p>
+        ${table}
+        <div style="margin-top:12px">${feas.map(([label, pass, d]) => `<div class="check"><span class="tick ${pass ? "y" : "n"}">${pass ? "✓" : "×"}</span><span><b style="font-weight:550">${esc(label)}</b> <span class="muted">${esc(d)}</span></span></div>`).join("")}</div>
+      </section>
+    </div>
+    <aside class="stack" style="min-width:0">
+      <section class="card" data-tour="approval"><div class="between"><h3>Participant approval</h3>${SIM}</div>
+        <div style="margin-top:8px">${approvals}</div>
+        ${ex && at >= 0 ? `<div class="timeline" style="margin-top:12px">${stages.slice(1).map((s, i) => `<span class="tl ${at >= i + 1 ? "done" : ""}"><i></i>${esc(Engine.STAGE_LABEL[s])}</span>`).join("")}</div>` : ""}
+        ${isProposed && canAct && !myState ? `<div class="row" style="margin-top:12px"><button class="btn primary" data-act="approve" data-sig="${esc(sig)}" data-tour="approve-btn">Approve as ${esc(c.name)}</button><button class="btn danger" data-act="decline" data-sig="${esc(sig)}">Decline</button></div>` : ""}
+        ${it.declined && !live ? `<p class="small muted" style="margin-top:10px">This exchange was declined and is out of the matching pool.</p><button class="btn sm" style="margin-top:6px" data-act="reopen" data-sig="${esc(sig)}">Allow it again</button>` : ""}
+        ${isProposed && it.eligible !== false && !mine ? `<p class="small muted" style="margin-top:10px">${esc(c.name)} is not part of this exchange. Switch company to respond.</p>` : ""}
+        ${live && ex.status === "proposed" ? `<button class="btn" style="margin-top:8px;width:100%" data-act="simulate-others" data-sig="${esc(sig)}" data-tour="sim-btn">Simulate other participants</button><p class="small faint" style="margin-top:6px">Rule: a simulated company approves if its gain clears its stated minimum (My Preferences). It is not a prediction of real behaviour.</p>` : ""}
+        ${live && ex.status !== "proposed" ? `<div class="row" style="margin-top:12px"><button class="btn primary" data-act="advance" data-sig="${esc(sig)}">Advance simulated stage</button><button class="btn danger" data-act="dropout" data-sig="${esc(sig)}">Simulate dropout</button></div>` : ""}
+        ${ex && !live ? `<p class="small muted" style="margin-top:10px">${ex.status === "completed" ? "This simulated exchange is finished. No goods moved." : "This proposal is closed."}${ex.closedReason ? " It closed because " + esc(ex.closedReason) + "." : ""}</p>` : ""}
+      </section>
+      ${mine ? `<section class="card"><h3>For ${esc(c.name)}</h3>
+        <div class="give-get" style="margin-top:8px">
+          <div><span class="sw" style="${lotOf(mine.lotId) ? swatchStyle(lotOf(mine.lotId)) : ""}"></span><div style="min-width:0"><div class="faint small">You send</div><div class="small" style="font-weight:600">${esc(mine.lotName)}</div></div></div>
+          <div><span class="sw" style="${lotOf(mine.recvId) ? swatchStyle(lotOf(mine.recvId)) : ""}"></span><div style="min-width:0"><div class="faint small">You receive</div><div class="small" style="font-weight:600">${esc(mine.recvName)}</div></div></div>
+        </div>
+        <div class="between" style="margin-top:12px"><span class="muted small">Estimated gain if completed</span><span class="gain ${mine.gain < 0 ? "neg" : ""}">${signed(mine.gain)}</span></div></section>` : ""}
+      <section class="card flat"><h3>Group summary</h3><div class="small" style="margin-top:6px">
+        ${[["Gain if completed", won(it.surplus)], ["Total logistics", won(it.logistics)], ["Chance all participants follow through", Math.round(it.succ * 100) + "%"], ["Expected gain after risk", won(it.w)]].map(([a, b]) => `<div class="between" style="padding:4px 0"><span class="muted">${a}</span><b class="num">${b}</b></div>`).join("")}</div></section>
+      <div class="note small">Nothing here moves goods or money, and companies are fictional and unverified. A real exchange would need contracts, physical swatch checks and carriers.</div>
+    </aside>
+  </div>`;
+}
+
+/* ---- 7. Activity ---- */
+function pageActivity() {
+  const c = me(), scope = ui.actScope;
+  const rel = (e) => scope === "all" || e.companies.includes(c.id);
+  const liveEx = state.exchanges.filter((e) => Engine.findExchange(state, e.sig) === e && rel(e));
+  const past = state.exchanges.filter((e) => Engine.findExchange(state, e.sig) !== e && rel(e));
+  const hist = (state.history || []).filter((h) => scope === "all" || h.parties.includes(c.name));
+  const logs = state.activity.filter((a) => scope === "all" || a.companies.includes(c.id)).slice(0, 30);
+  const row = (e) => {
+    const names = e.snapshot.members.map((m) => m.lotName).join(" → ");
+    return `<button class="ex" data-act="open-ex" data-sig="${esc(e.sig)}" style="grid-template-columns:minmax(0,1fr) auto;align-items:center"><div style="min-width:0"><div class="row"><b>${e.k}-way exchange</b>${statusPill(e.status)}</div><div class="small muted" style="margin-top:4px">${esc(names)}</div><div class="small faint">${esc(e.snapshot.members.map((m) => m.companyName).join(", "))}</div></div><span class="btn ghost sm">Open →</span></button>`;
+  };
+  return `
+  <div class="page-head"><div><h1>Activity</h1><p>Status and history of exchanges in this demo. Everything is simulated: no goods, money or commitments are involved.</p></div>
+    <div class="seg" role="group" aria-label="Scope"><button data-act="act-scope" data-v="mine" aria-pressed="${scope === "mine"}">${esc(c.name)}</button><button data-act="act-scope" data-v="all" aria-pressed="${scope === "all"}">All companies</button></div></div>
+  <div class="grid-main">
+    <div class="stack" style="min-width:0">
+      <h2>In progress</h2>
+      ${liveEx.length ? liveEx.map(row).join("") : `<div class="empty"><h3>No open exchanges</h3><p class="small">Open an exchange from Exchange Matches and approve it to begin.</p><button class="btn sm" data-go="matches" style="margin-top:6px">Go to matches</button></div>`}
+      ${past.length ? `<h2>Closed in this session</h2>${past.map(row).join("")}` : ""}
+      <h2>Sample history</h2>
+      <div class="note small">Fictional entries included so the page is not empty on first open. They did not come from your actions.</div>
+      ${hist.map((h) => `<div class="card flat"><div class="row"><b>${esc(h.title)}</b>${statusPill(h.status)}<span class="pill sim">Sample</span></div><div class="small muted" style="margin-top:4px">${esc(h.parties.join(", "))} · ${h.daysAgo} days ago</div>${h.note ? `<div class="small faint">${esc(h.note)}</div>` : ""}</div>`).join("") || `<p class="small faint">No sample entries for this company.</p>`}
+    </div>
+    <aside class="card" style="min-width:0"><h3>Event log</h3><div style="margin-top:6px">${logs.map((a) => `<div class="small" style="padding:7px 0;border-top:1px solid var(--line)"><div>${esc(a.text)}</div><div class="faint">${ago(a.at)} · simulated</div></div>`).join("") || `<p class="small faint">No events yet.</p>`}</div></aside>
+  </div>`;
+}
+
+/* ---- 8. How it works ---- */
+function pageHow() {
+  const t = (cols, rows) => `<div class="tw"><table><thead><tr>${cols.map((c) => `<th>${c}</th>`).join("")}</tr></thead><tbody>${rows.map((r) => `<tr>${r.map((x) => `<td>${x}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+  const results = ui.checks;
+  return `
+  <div class="page-head"><div><h1>How matching works</h1><p>What this prototype calculates, what it assumes, and how it differs from the research model behind it.</p></div>
+    <a class="btn" href="research-lab.html">Open the research lab</a></div>
+  <div class="stack">
+    <section class="card"><h2>From inventory to exchanges</h2>
+      <ol class="small" style="margin:10px 0 0;padding-left:18px;max-width:78ch"><li style="margin-bottom:5px"><b>Compatibility.</b> Each company's preferences are compared with each lot's specifications. This builds a directed graph: an edge means "this company would accept this lot".</li>
+      <li style="margin-bottom:5px"><b>Cycle search.</b> All 2-, 3- and 4-way cycles are listed. A cycle cannot include the same company twice.</li>
+      <li style="margin-bottom:5px"><b>Economic test.</b> Each company's gain is <code>value received − fallback value given up − logistics paid</code>. Under the default rule, everyone must gain. Expected gain after dropout risk must be positive.</li>
+      <li style="margin-bottom:5px"><b>Optimization.</b> An exact solver picks the non-overlapping set with the highest total expected gain. A lot can join only one exchange.</li>
+      <li><b>Independent check.</b> Selected exchanges are re-derived from the raw lots before being shown.</li></ol>
+      <p class="small muted" style="margin-top:10px">The solver maximizes total gain across all companies. It is not designed to favor any single company, so a route that looks best for you can lose to a better overall round.</p></section>
+    <section class="card"><h2>Prototype assumptions</h2><p class="small muted" style="margin:3px 0 10px">Written for this demo. None has been validated with real companies or trades.</p>
+      ${t(["Item", "Rule used here", "Status"], [
+        ["Compatibility", "A lot qualifies if it meets every stated requirement in at least one profile (category, fiber share, excluded fibers, GSM, width, quantity, color, certification, distance). Or if it is on the wishlist.", "Prototype assumption. Real fit also depends on hand, drape, shade and quality, which are not modelled"],
+        ["Value to a recipient (W)", "Listed value × profile value factor. Missing a preferred color lowers it by 10%.", "Prototype assumption. Factors are stated by the company and uncalibrated"],
+        ["Listed value", "Owner's estimate.", "Self-reported. No price discovery or verification"],
+        ["Fallback value (S)", "Owner-stated share of listed value. Demo lots use 45-60%.", "Assumed. The research used a 30-70% range"],
+        ["Weight", "Quantity × width × GSM.", "Physical formula. Ignores core and packaging"],
+        ["Logistics", "₩30,000 per shipment + ₩150 per km per 50 kg, straight-line distance, 8 km floor.", "Assumed. Carried over from the research, not carrier rates"],
+        ["Dropout risk", "5% per company; an exchange succeeds with (1−risk)^k; half of logistics is sunk on failure.", "Assumed. Carried over from the research"],
+        ["Simulated approval", "A company approves if its gain clears its stated minimum.", "Illustrative only. Not a model of behaviour"],
+      ])}</section>
+    <section class="card"><h2>Research model and this prototype</h2>
+      ${t(["Topic", "Research model", "This prototype", "Why"], [
+        ["Graph node", "One firm with one lot", "One inventory lot", "Companies hold many lots. With one lot per company the two are identical"],
+        ["Packing limit", "Each firm in at most one cycle", "Each lot in at most one cycle; a company may join several cycles with different lots", "Multiple lots per company"],
+        ["Inside a cycle", "Firms are distinct by construction", "Explicit rule: no company twice", "A company must not trade with itself"],
+        ["Acceptance", "Random draw", "Derived from specifications and preferences", "Requested change. Results are therefore not comparable with the research percentages"],
+        ["Own fabric type", "Never accepted", "Allowed if preferences say so", "Now an explicit choice"],
+        ["Subjective value", "Random lognormal draw", "Listed value × stated factor", "Companies can state it. Removes noise, adds an unverified assumption"],
+        ["Lot weight", "Derived from value", "Derived from specifications", "Real specifications are now available"],
+        ["Unchanged", "Enumeration walk, net gain, regimes, expected profit, exact solver", "Same", "Reused from research code"],
+      ])}
+      <div class="note ok" style="margin-top:10px"><b>Consistency check.</b> With one lot per company and research data fed in, this engine chose the same cycles as the research engine in all 900 comparisons run during development. That shows the logic carries over. It does not validate the textile assumptions above.</div></section>
+    <section class="card"><h2>Credits are not payments</h2><p class="small" style="margin-top:6px;max-width:78ch">Mutual gain is the default and uses no credits. <b>Balancing credits</b> and <b>Surplus split</b> are research mechanisms kept for comparison. Balancing credits are not budget-balanced: the payer's amount and the receiver's amount differ, so this could not operate as a ledger as written. Surplus split assumes gains can be shared perfectly. Neither is a wallet, invoice, payment or settlement feature, and nothing is held or transferred.</p></section>
+    <section class="card"><h2>What is not here</h2><ul class="small" style="margin:8px 0 0;padding-left:18px;max-width:78ch"><li>Real companies, verification, contracts, carriers, payments, tax or customs handling</li><li>Splitting a lot, or partial quantities</li><li>Physical quality checks: swatch stages are simulated labels only</li><li>Protection against misreported lots or values, and any evidence that companies would adopt this</li><li>Chains that do not close into a cycle, and arrivals over time</li></ul></section>
+    <section class="card"><div class="between"><div><h2>Built-in checks</h2><p class="small muted">Small markets with hand-worked answers, plus workflow safeguards.</p></div><button class="btn primary" data-act="run-checks">${results ? "Run again" : "Run checks"}</button></div>
+      ${results ? `<div class="note ${results.every((r) => r.ok) ? "ok" : "warn"}" style="margin-top:10px"><b>${results.filter((r) => r.ok).length} of ${results.length} checks passed</b></div>
+      <div style="margin-top:8px">${results.map((r) => `<details style="padding:5px 0;border-top:1px solid var(--line)"><summary><span class="tick ${r.ok ? "y" : "n"}" style="margin-right:6px">${r.ok ? "✓" : "×"}</span>${esc(r.title)}</summary>${t(["Check", "Expected", "Engine"], r.rows.map((x) => [esc(x.label), esc(x.expected), esc(x.actual)]))}</details>`).join("")}</div>` : ""}</section>
+  </div>`;
+}
+</script>
+<script>
+/* ===========================================================================
+ * App shell: routing, commits, interactions, drawer, guided demo.
+ * ======================================================================== */
+const PAGES = {
+  dashboard: ["Dashboard", pageDashboard], inventory: ["My Inventory", pageInventory], preferences: ["My Preferences", pagePreferences],
+  marketplace: ["Marketplace", pageMarketplace], matches: ["Exchange Matches", pageMatches], activity: ["Activity", pageActivity], how: ["How it works", pageHow],
+};
+const mySigs = () => new Set(M ? Engine.companyView(state, M, state.current).eligible.map((i) => i.sig) : []);
+
+/** Any change to inventory, preferences, decisions or rules comes through here. */
+function commit(message, opts = {}) {
+  const before = mySigs();
+  const closed = Engine.revalidate(state);
+  M = Engine.computeMarket(state);
+  saveState();
+  const after = mySigs();
+  const added = [...after].filter((s) => !before.has(s)).length, removed = [...before].filter((s) => !after.has(s)).length;
+  const bits = [];
+  if (message) bits.push(message);
+  if (!opts.quiet && (added || removed)) bits.push(`Matches updated for ${me().name}: ${added ? `+${added} new` : ""}${added && removed ? ", " : ""}${removed ? `${removed} no longer available` : ""}`);
+  if (closed) bits.push(`${closed} open proposal${closed === 1 ? "" : "s"} closed`);
+  if (!storageOk) bits.push("Could not save in this browser, so changes last only until you close the page");
+  if (bits.length) toast(bits.join(". ") + ".");
+  render();
+}
+let toastTimer;
+function toast(msg) {
+  ui.toast = msg;
+  const el = $("#toast");
+  el.textContent = msg; el.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.hidden = true; ui.toast = null; }, 4200);
+}
+
+/* ---- Routing and render ---- */
+function parseHash() {
+  const h = decodeURIComponent(location.hash.slice(1));
+  if (h.startsWith("exchange/")) { ui.page = "exchange"; ui.sig = h.slice(9); return; }
+  ui.page = PAGES[h] ? h : "dashboard"; ui.sig = null;
+}
+function setHash(h) { try { history.replaceState(null, "", "#" + h); } catch (e) { /* non-navigable origin */ } }
+function go(page, sig) {
+  ui.page = page; ui.sig = sig || null;
+  setHash(page === "exchange" ? "exchange/" + encodeURIComponent(sig) : page);
+  render();
+  window.scrollTo(0, 0);
+  const main = $("#main");
+  if (main) main.focus({ preventScroll: true });
+}
+function render() {
+  const active = document.activeElement, focusId = active && active.id ? active.id : null;
+  const caret = focusId && active.selectionStart != null ? active.selectionStart : null;
+  renderShell();
+  $("#page").innerHTML = ui.page === "exchange" ? pageExchange() : PAGES[ui.page][1]();
+  renderOverlay();
+  renderTour();
+  hydrateGraphs();
+  if (focusId) {
+    const el = document.getElementById(focusId);
+    if (el && el.tagName !== "BUTTON") {
+      el.focus({ preventScroll: true });
+      if (caret != null && el.setSelectionRange && el.type !== "number") { try { el.setSelectionRange(caret, caret); } catch (e) { /* unsupported input */ } }
+    }
+  }
+}
+function renderShell() {
+  const c = me(), v = Engine.companyView(state, M, c.id);
+  const waiting = state.exchanges.filter((e) => e.status === "proposed" && e.companies.includes(c.id) && !e.approvals[c.id]).length;
+  const item = (key, label, count) => `<button data-go="${key}" ${ui.page === key || (ui.page === "exchange" && key === "matches") ? 'aria-current="page"' : ""}><span>${label}</span>${count ? `<span class="count">${count}</span>` : ""}</button>`;
+  $("#side").innerHTML = `
+    <div class="side-top">
+      <div class="brand"><svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11" fill="none" stroke="#1f4d3a" stroke-width="3.5"/><path d="M16 5a11 11 0 0 1 9.5 16.5" fill="none" stroke="#b0603a" stroke-width="3.5" stroke-linecap="round"/></svg><b>Reweft</b></div>
+      <div class="switcher"><label for="co-switch">Viewing as</label><select id="co-switch" data-tour="switcher">${state.companies.map((x) => `<option value="${x.id}" ${x.id === c.id ? "selected" : ""}>${esc(x.name)}</option>`).join("")}</select></div>
+    </div>
+    <nav class="nav" aria-label="Main">
+      ${item("dashboard", "Dashboard")}${item("inventory", "My Inventory", state.lots.filter((l) => l.owner === c.id && l.status === "active").length)}${item("preferences", "My Preferences")}${item("marketplace", "Marketplace")}${item("matches", "Exchange Matches", v.eligible.length)}${item("activity", "Activity", waiting)}
+      <div class="nav-sep"></div>${item("how", "How it works")}
+    </nav>
+    <div class="side-foot"><button class="btn sm" style="width:100%;text-decoration:none;margin-bottom:8px" data-act="tour-start">Guided demo</button>
+      Fictional demo companies. Edits stay in this browser. <button data-act="reset">Reset demo</button></div>`;
+}
+
+/* ---- Drawer ---- */
+function blankLot() {
+  return { name: "", category: "Cotton woven", compositionText: "100% cotton", gsm: 150, width: 150, colorFamily: "Ecru", color: "", qty: 200, city: me().city, value: 2000000, outsidePct: 0.5, certs: [], note: "", photos: [] };
+}
+function openLotForm(lot, draftOverride) {
+  ui.drawer = { type: "lot", id: lot ? lot.id : null, errors: {},
+    draft: draftOverride || (lot ? Object.assign({}, lot, { compositionText: Engine.compositionText(lot.composition), photos: (lot.photos || []).slice(), certs: (lot.certs || []).slice() }) : blankLot()) };
+  renderOverlay();
+}
+function renderOverlay() {
+  const host = $("#overlay"), d = ui.drawer;
+  if (!d) { host.innerHTML = ""; return; }
+  if (d.rendered && d.type === "lot" && !d.force) return;
+  d.rendered = true; d.force = false;
+  if (d.type === "lot") {
+    host.innerHTML = `<div class="scrim" data-act="close-drawer"></div><div class="drawer" role="dialog" aria-modal="true" aria-label="${d.id ? "Edit lot" : "Add a lot"}">
+      <header><h2>${d.id ? "Edit lot" : "Add a lot"}</h2><button class="btn ghost" data-act="close-drawer" aria-label="Close">×</button></header>
+      <div class="body">${lotForm()}</div>
+      <footer><button class="btn" data-act="close-drawer">Cancel</button><button class="btn primary" data-act="save-lot" data-tour="save-lot">${d.id ? "Save changes" : "Add to inventory"}</button></footer></div>`;
+    const inp = $("#photo-in");
+    if (inp) inp.onchange = async () => {
+      captureDraft();
+      try { for (const f of Array.from(inp.files).slice(0, 3 - d.draft.photos.length)) d.draft.photos.push(await readPhoto(f)); d.errors.photos = null; }
+      catch (e) { d.errors.photos = e.message; }
+      d.force = true; renderOverlay();
+    };
+  } else if (d.type === "view") {
+    const l = lotOf(d.id);
+    host.innerHTML = `<div class="scrim" data-act="close-drawer"></div><div class="drawer" role="dialog" aria-modal="true" aria-label="Lot details"><header><h2>${esc(l.name)}</h2><button class="btn ghost" data-act="close-drawer" aria-label="Close">×</button></header><div class="body">${lotDetail(l)}</div></div>`;
+  } else if (d.type === "confirm") {
+    host.innerHTML = `<div class="scrim" data-act="close-drawer"></div><div class="drawer" role="alertdialog" aria-modal="true" aria-label="${esc(d.title)}" style="height:auto;bottom:auto;top:18vh;right:50%;transform:translateX(50%);width:min(440px,92vw);border-radius:14px"><div class="body"><h2>${esc(d.title)}</h2><p class="muted" style="margin-top:8px">${esc(d.text)}</p></div><footer><button class="btn" data-act="close-drawer">Cancel</button><button class="btn ${d.danger ? "danger" : "primary"}" data-act="confirm-yes">${esc(d.yes)}</button></footer></div>`;
+  }
+}
+function captureDraft() {
+  const form = $("#lot-form");
+  if (!form || !ui.drawer) return;
+  const fd = new FormData(form), dr = ui.drawer.draft;
+  for (const k of ["name", "category", "city", "colorFamily", "color", "note"]) dr[k] = fd.get(k);
+  dr.compositionText = fd.get("composition");
+  for (const k of ["gsm", "width", "qty", "value"]) dr[k] = fd.get(k);
+  dr.outsidePct = Number(fd.get("outsidePct")) / 100;
+  dr.certs = fd.getAll("cert");
+}
+function saveLotFromForm() {
+  captureDraft();
+  const d = ui.drawer, dr = d.draft, e = {};
+  if (!String(dr.name).trim()) e.name = "Give this lot a name.";
+  const parsed = Engine.parseComposition(dr.compositionText);
+  if (parsed.error) e.composition = parsed.error;
+  for (const [k, label] of [["gsm", "GSM"], ["width", "Width"], ["qty", "Quantity"], ["value", "Estimated value"]]) if (!(Number(dr[k]) > 0)) e[k] = `${label} must be greater than zero.`;
+  if (!(dr.outsidePct >= 0 && dr.outsidePct <= 1)) e.outsidePct = "Enter a percentage from 0 to 100.";
+  if (Object.keys(e).length) {
+    d.errors = e; d.force = true; renderOverlay();
+    const first = document.querySelector("#lot-form .err");
+    if (first) first.scrollIntoView({ block: "center" });
+    return false;
+  }
+  const data = { name: String(dr.name).trim(), category: dr.category, city: dr.city, colorFamily: dr.colorFamily, color: String(dr.color).trim(), note: String(dr.note || "").trim(),
+    composition: parsed.composition, gsm: Number(dr.gsm), width: Number(dr.width), qty: Number(dr.qty), value: Number(dr.value), outsidePct: dr.outsidePct, certs: dr.certs, photos: dr.photos || [] };
+  let msg;
+  if (d.id) { Object.assign(lotOf(d.id), data); msg = `${data.name} updated`; }
+  else {
+    const id = "U" + String(state.nextLot++).padStart(2, "0");
+    state.lots.push(Object.assign({ id, owner: state.current, status: "active" }, data));
+    msg = `${data.name} added`;
+    ui.lastAdded = id;
+  }
+  ui.drawer = null; renderOverlay();
+  commit(msg);
+  return true;
+}
+
+/* ---- Actions ---- */
+const updateProfile = (pid, fn) => { const p = me().profiles.find((x) => x.id === pid); if (p) { fn(p); commit(); } };
+const ACT = {
+  "new-lot": () => openLotForm(null),
+  "edit-lot": (el) => openLotForm(lotOf(el.dataset.id)),
+  "view-lot": (el) => { ui.drawer = { type: "view", id: el.dataset.id }; renderOverlay(); },
+  "close-drawer": () => { ui.drawer = null; renderOverlay(); },
+  "save-lot": () => saveLotFromForm(),
+  "rm-photo": (el) => { captureDraft(); ui.drawer.draft.photos.splice(+el.dataset.i, 1); ui.drawer.force = true; renderOverlay(); },
+  "remove-lot": (el) => {
+    const l = lotOf(el.dataset.id);
+    ui.drawer = { type: "confirm", title: `Remove ${l.name}?`, text: "It leaves the matching pool. Open proposals that use it will close. You can restore it only by resetting the demo.", yes: "Remove lot", danger: true,
+      run: () => { state.lots = state.lots.filter((x) => x.id !== l.id); commit(`${l.name} removed`); } };
+    renderOverlay();
+  },
+  "confirm-yes": () => { const run = ui.drawer.run; ui.drawer = null; renderOverlay(); run(); },
+  "toggle-pause": (el) => { const l = lotOf(el.dataset.id); l.status = l.status === "paused" ? "active" : "paused"; commit(`${l.name} ${l.status === "paused" ? "paused" : "back in the pool"}`); },
+  "inv-filter": (el) => { ui.invFilter = el.dataset.v; render(); },
+  "pf-chip": (el) => updateProfile(el.dataset.pid, (p) => {
+    const f = el.dataset.field, v = el.dataset.v; p[f] = p[f] || [];
+    p[f] = p[f].includes(v) ? p[f].filter((x) => x !== v) : p[f].concat(v);
+  }),
+  "pf-add": () => { const c = me(); c.profiles = c.profiles || []; c.profiles.push({ id: "p" + Date.now().toString(36), name: "New profile", categories: [], valueFactor: 1 }); commit(); },
+  "pf-remove": (el) => { const c = me(); c.profiles = c.profiles.filter((p) => p.id !== el.dataset.pid); commit("Profile removed"); },
+  "set-override": (el) => {
+    const c = me(); c.overrides = c.overrides || {};
+    if (el.dataset.v) c.overrides[el.dataset.id] = el.dataset.v; else delete c.overrides[el.dataset.id];
+    commit(el.dataset.v ? "Added to wishlist" : "Removed from wishlist");
+  },
+  "clear-override": (el) => { delete me().overrides[el.dataset.id]; commit(); },
+  "mp-fit": (el) => { ui.mp.fit = el.dataset.v; render(); },
+  "mp-clear": () => { ui.mp = { q: "", cat: "all", fiber: "all", city: "all", color: "all", gsmMin: "", gsmMax: "", qtyMin: "", fit: "all" }; render(); },
+  "set-L": (el) => { state.settings.L = +el.dataset.v; if (ui.matchK !== "all" && +ui.matchK > state.settings.L) ui.matchK = "all"; commit(); },
+  "set-regime": (el) => { state.settings.regime = el.dataset.v; commit(); },
+  "toggle-rules": () => { ui.rulesOpen = !ui.rulesOpen; render(); },
+  "match-k": (el) => { ui.matchK = el.dataset.v; render(); },
+  "match-scope": (el) => { ui.matchScope = el.dataset.v; render(); },
+  "act-scope": (el) => { ui.actScope = el.dataset.v; render(); },
+  "open-ex": (el) => go("exchange", el.dataset.sig),
+  approve: (el) => approveAs(el.dataset.sig, state.current),
+  decline: (el) => {
+    const it = itemFor(el.dataset.sig);
+    if (!Engine.findExchange(state, el.dataset.sig)) Engine.propose(state, it);
+    const err = Engine.respond(state, el.dataset.sig, state.current, "declined");
+    if (err) return toast(err);
+    commit(`${me().name} declined. Matches recalculated without this exchange`);
+  },
+  "simulate-others": (el) => {
+    const out = Engine.simulateResponses(state, el.dataset.sig, state.current);
+    const no = out.filter((x) => x.decision === "declined");
+    commit(no.length ? `${coOf(no[0].cid).name} declined (simulated): ${no[0].reason}` : out.length ? "Other participants approved (simulated)" : "No other responses pending");
+  },
+  advance: (el) => { const e = Engine.advance(state, el.dataset.sig); if (e) return toast(e); commit("Simulated stage updated"); },
+  dropout: (el) => {
+    const ex = Engine.findExchange(state, el.dataset.sig);
+    const other = ex.companies.find((c) => c !== state.current) || state.current;
+    const e = Engine.dropout(state, el.dataset.sig, other);
+    if (e) return toast(e);
+    commit("Dropout simulated. Lots returned to the pool");
+  },
+  reopen: (el) => { delete state.declined[el.dataset.sig]; commit("This exchange can be offered again"); },
+  "run-checks": () => { ui.checks = Checks.run(); render(); },
+  reset: () => {
+    ui.drawer = { type: "confirm", title: "Reset the demo?", text: "This restores the original fictional companies and lots, and removes your edits, photos and activity from this browser.", yes: "Reset demo", danger: true, run: resetDemo };
+    renderOverlay();
+  },
+  "toggle-part": (el) => { me().participating = el.checked; commit(el.checked ? "Back in matching" : "Participation paused"); },
+  "tour-start": () => {
+    ui.drawer = { type: "confirm", title: "Start the guided demo?", text: "The demo starts from the original data, so your edits, photos and activity in this browser will be replaced.", yes: "Reset and start", run: () => { resetDemo(true); tourGo(0); } };
+    renderOverlay();
+  },
+  "tour-next": () => tourNext(),
+  "tour-back": () => tourGo(ui.tour - 1),
+  "tour-end": () => { ui.tour = null; render(); },
+};
+function resetDemo(silent) {
+  state = Seed.fresh();
+  ui.matchK = "all"; ui.matchScope = "mine"; ui.invFilter = "active"; ui.lastAdded = null;
+  M = Engine.computeMarket(state);
+  saveState();
+  if (!silent) toast("Demo reset to its original data.");
+  go("dashboard");
+}
+function approveAs(sig, cid) {
+  const it = itemFor(sig);
+  if (!it) return toast("This exchange is no longer available.");
+  if (!Engine.findExchange(state, sig)) Engine.propose(state, it);
+  const err = Engine.respond(state, sig, cid, "approved");
+  if (err) return toast(err);
+  commit(`${coOf(cid).name} approved (simulated)`, { quiet: true });
+}
+
+/* ---- Global events ---- */
+document.addEventListener("click", (e) => {
+  const actEl = e.target.closest("[data-act]");
+  if (actEl && !(actEl.type === "checkbox")) {
+    const fn = ACT[actEl.dataset.act];
+    if (fn) { if (actEl.tagName === "BUTTON" && actEl.closest("form")) e.preventDefault(); fn(actEl); return; }
+  }
+  const g = e.target.closest("[data-go]");
+  if (g) go(g.dataset.go);
+});
+document.addEventListener("change", (e) => {
+  const el = e.target;
+  if (el.id === "co-switch") { state.current = el.value; saveState(); toast(`Now viewing as ${me().name}.`); if (ui.page === "exchange") render(); else render(); return; }
+  if (el.dataset.act === "toggle-part") return ACT["toggle-part"](el);
+  if (el.dataset.mp) { ui.mp[el.dataset.mp] = el.value; return render(); }
+  if (el.dataset.pf) {
+    const f = el.dataset.pf, raw = el.value;
+    return updateProfile(el.dataset.pid, (p) => {
+      const n = raw === "" ? null : Number(raw);
+      if (f === "name") p.name = raw || "Untitled profile";
+      else if (f === "fiber") { if (raw) p.fiberMin = { fiber: raw, min: p.fiberMin ? p.fiberMin.min : 50 }; else delete p.fiberMin; }
+      else if (f === "fibermin") { if (p.fiberMin) p.fiberMin.min = n ?? 0; }
+      else if (f === "valueFactor") p.valueFactor = n > 0 ? n : 1;
+      else p[f] = n;
+    });
+  }
+  if (el.dataset.co) { const c = me(), n = Number(el.value); if (Number.isFinite(n) && n >= 0) { c[el.dataset.co] = n; commit(); } return; }
+  if (el.dataset.rule) {
+    const n = Number(el.value), k = el.dataset.rule;
+    const lim = { p_fail: [0, 0.95], fail_cost_share: [0, 1], credit_discount: [0, 1], cost_scale: [0, 50], c_fixed: [0, 1e7], c_km: [0, 1e5] }[k];
+    if (Number.isFinite(n)) { state.settings[k] = Math.max(lim[0], Math.min(lim[1], n)); commit(); }
+  }
+});
+document.addEventListener("input", (e) => { if (e.target.dataset && e.target.dataset.mp === "q") { ui.mp.q = e.target.value; render(); } });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && ui.drawer) { ui.drawer = null; renderOverlay(); } });
+let lastW = innerWidth, rT;
+addEventListener("resize", () => { if (innerWidth !== lastW) { lastW = innerWidth; clearTimeout(rT); rT = setTimeout(hydrateGraphs, 150); } });
+addEventListener("hashchange", () => { parseHash(); render(); });
+
+/* ---- Guided demo ---- */
+const G = "L01>L03>L05";
+const TOUR = [
+  { title: "A denim lot with no direct partner", text: "You are Namsan Atelier. You hold 420 m of indigo denim and want fluid viscose. The company with the viscose doesn't want denim, so a normal two-way swap goes nowhere.", go: () => go("dashboard"), target: "hero" },
+  { title: "The stuck lot in your inventory", text: "This lot shows a route marked “multi-way only”. No direct swap works for it, but a longer loop does.", go: () => go("inventory"), target: "L01" },
+  { title: "What multi-way adds", text: "The same lots and preferences. Direct swaps alone move 2 lots here. Allowing 3- and 4-way cycles moves 9, because more loops can close.", go: () => go("matches"), target: "compare" },
+  { title: "Your best route is a 3-way loop", text: "Calculated live from specifications, preferences and costs. Open it to see exactly who sends what.", go: () => go("matches"), target: "guided-card" },
+  { title: "Who sends what to whom", text: "Namsan sends denim to Palgong. Palgong sends jersey to Mudeung. Mudeung sends viscose to Namsan. Each company gets something it asked for.", go: () => go("exchange", G), target: "graph" },
+  { title: "Why two-way matching fails", text: "Each pair wants something in only one direction. The reasons come directly from each company's stated requirements.", go: () => go("exchange", G), target: "why" },
+  { title: "Does everyone actually gain?", text: "Each company's gain is estimated after what it gives up and the logistics it pays. These are estimates built on assumptions, and How it works lists them.", go: () => go("exchange", G), target: "econ" },
+  { title: "Approve as Namsan", text: "Press Next to approve on Namsan's behalf. This is a demo decision: nothing is committed.", go: () => go("exchange", G), target: "approval", next: () => approveAs(G, "namsan"), nextLabel: "Approve" },
+  { title: "The other companies respond", text: "They are simulated. Each approves if its gain clears the minimum set in its preferences. Press Next to run them.", go: () => go("exchange", G), target: "approval", next: () => ACT["simulate-others"]({ dataset: { sig: G } }), nextLabel: "Simulate" },
+  { title: "Lots are reserved and matches recalculate", text: "With all three approved, these lots leave the pool so they can't be promised twice. Any other route that used them disappears.", go: () => go("matches"), target: "compare" },
+  { title: "Now add a material of your own", text: "A prefilled poplin lot is open. Change anything you like, then press Next or Add to inventory. Seomjin Linen House has asked for crisp cotton shirting.", go: () => { go("inventory"); openLotForm(null, Object.assign(Seed.tourLot(), { photos: [] })); }, target: "save-lot", next: () => { if ($("#lot-form")) return saveLotFromForm(); return true; }, nextLabel: "Add lot" },
+  { title: "Your lot just created a match", text: "Namsan wants Seomjin's linen and Seomjin wants your poplin, so a direct swap appeared. Nothing was pre-scripted: try editing the GSM or quantity and watch it change.", go: () => { ui.matchK = "all"; go("matches"); }, target: null },
+  { title: "That is the idea", text: "Everything you saw is a simulation with fictional companies. Switch company, change preferences or add lots to keep exploring. How it works lists every assumption.", go: () => {}, target: null, last: true },
+];
+function tourGo(i) {
+  ui.tour = Math.max(0, Math.min(TOUR.length - 1, i));
+  if (ui.drawer && ui.tour !== 10) { ui.drawer = null; renderOverlay(); }
+  TOUR[ui.tour].go();
+  renderTour();
+}
+function tourNext() {
+  const s = TOUR[ui.tour];
+  if (s.next) {
+    const res = s.next();
+    if (res === false) return; // form errors: stay on this step
+    // Already completed by hand? The engine refuses, and the tour simply moves on.
+  }
+  if (s.last) { ui.tour = null; render(); return; }
+  tourGo(ui.tour + 1);
+}
+function renderTour() {
+  $$(".tour-target").forEach((x) => x.classList.remove("tour-target"));
+  const host = $("#tour");
+  if (ui.tour == null) { host.innerHTML = ""; return; }
+  const s = TOUR[ui.tour];
+  host.innerHTML = `<div class="tour" role="dialog" aria-label="Guided demo"><div class="bar"><i style="width:${((ui.tour + 1) / TOUR.length) * 100}%"></i></div>
+    <div class="small" style="color:#a9c9b6">Step ${ui.tour + 1} of ${TOUR.length}</div><h3>${esc(s.title)}</h3><p>${esc(s.text)}</p>
+    <div class="between" style="margin-top:12px"><button class="btn ghost sm" data-act="tour-end">${s.last ? "" : "Exit"}</button><div class="row">${ui.tour > 0 && !s.next && !TOUR[ui.tour - 1].next ? `<button class="btn ghost sm" data-act="tour-back">Back</button>` : ""}<button class="btn sm" data-act="tour-next">${esc(s.nextLabel || (s.last ? "Finish" : "Next"))}</button></div></div></div>`;
+  if (s.target) {
+    const el = document.querySelector(`[data-tour="${CSS.escape(s.target)}"]`);
+    if (el) { el.classList.add("tour-target"); el.scrollIntoView({ block: "center", behavior: "auto" }); }
+  }
+}
+
+/* ---- Start ---- */
+M = Engine.computeMarket(state);
+Engine.revalidate(state);
+parseHash();
+render();
+</script>
+</body>
+</html>
