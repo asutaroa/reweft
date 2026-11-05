@@ -33,23 +33,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .muted { color: var(--ink-2); } .faint { color: var(--ink-3); } .small { font-size: 12.5px; } .num { font-variant-numeric: tabular-nums; }
 
 /* Shell */
-.app { display: grid; grid-template-columns: 244px minmax(0, 1fr); min-height: 100vh; }
-.side { background: var(--panel); border-right: 1px solid var(--line); padding: 20px 14px; display: flex; flex-direction: column; gap: 18px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
-.brand { display: flex; align-items: center; gap: 10px; padding: 0 6px; }
-.brand b { font: 500 20px/1 var(--serif); letter-spacing: -.01em; }
-.brand-mark { width: 26px; height: 26px; flex: none; }
-.switcher { border: 1px solid var(--line); border-radius: var(--radius-s); padding: 8px 10px; background: var(--bg); }
-.switcher label { display: block; font-size: 11px; color: var(--ink-3); letter-spacing: .04em; text-transform: uppercase; margin-bottom: 2px; }
-.switcher select { width: 100%; border: 0; background: none; font-weight: 600; padding: 2px 0; cursor: pointer; }
-.nav { display: flex; flex-direction: column; gap: 2px; }
-.nav button { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; padding: 8px 10px; border: 0; border-radius: 8px; background: none; cursor: pointer; color: var(--ink-2); text-align: left; font-size: 14px; }
-.nav button:hover { background: var(--panel-2); color: var(--ink); }
-.nav button[aria-current="page"] { background: var(--brand); color: #fff; font-weight: 550; }
-.nav .count { font-size: 11.5px; font-weight: 600; min-width: 20px; text-align: center; padding: 0 6px; border-radius: 99px; background: var(--brand-soft); color: var(--brand); }
-.nav button[aria-current="page"] .count { background: rgba(255,255,255,.2); color: #fff; }
-.nav-sep { height: 1px; background: var(--line); margin: 8px 6px; }
-.side-foot { margin-top: auto; font-size: 11.5px; color: var(--ink-3); line-height: 1.45; padding: 0 6px; }
-.side-foot button:not(.btn) { background: none; border: 0; padding: 0; color: var(--ink-2); text-decoration: underline; cursor: pointer; font-size: 11.5px; }
 main { min-width: 0; padding: 28px 36px 80px; max-width: 1280px; }
 .banner { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; background: var(--panel-2); border-bottom: 1px solid var(--line); padding: 7px 36px; font-size: 12.5px; color: var(--ink-2); }
 .page-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
@@ -198,14 +181,6 @@ details[open] summary { margin-bottom: 8px; }
 
 @media (max-width: 1040px) { .grid-main, .hero { grid-template-columns: minmax(0, 1fr); } .hero .graph { max-width: 340px; } }
 @media (max-width: 820px) {
-  .app { display: block; }
-  .side { position: sticky; top: 0; z-index: 30; height: auto; flex-direction: column; gap: 8px; padding: 10px 14px; border-right: 0; border-bottom: 1px solid var(--line); overflow: visible; }
-  .side-top { display: flex; gap: 10px; align-items: center; }
-  .brand { padding: 0; } .brand b { font-size: 18px; }
-  .switcher { flex: 1; min-width: 0; padding: 3px 8px; } .switcher label { display: none; }
-  .nav { flex-direction: row; overflow-x: auto; gap: 2px; scrollbar-width: none; margin: 0 -14px; padding: 0 14px; }
-  .nav button { width: auto; white-space: nowrap; padding: 6px 10px; font-size: 13px; }
-  .nav-sep, .side-foot { display: none; }
   main { padding: 18px 16px 90px; } .banner { padding: 6px 16px; }
   h1 { font-size: 25px; }
   .grid2, .form-grid { grid-template-columns: minmax(0, 1fr); }
@@ -254,16 +229,111 @@ details[open] summary { margin-bottom: 8px; }
 .net-opt-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.3; }
 .net-opt-text .faint { font-size: 11.5px; font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; }
 .net-opts { max-height: 240px; }
+
+/* v3: horizontal header, company identity, calmer hierarchy */
+:root { --shadow: 0 1px 2px rgba(25,26,23,.04); --shadow-l: 0 14px 44px rgba(25,26,23,.16); --content: 1160px; }
+h1 { font-size: 34px; }
+h2 { font-size: 22px; }
+.banner { justify-content: center; padding: 6px 24px; font-size: 12px; background: var(--bg); border-bottom: 1px solid var(--line); text-align: center; }
+.banner b { font-weight: 600; color: var(--ink); }
+.top-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; padding: 20px 32px 12px; background: var(--bg); }
+.top-left { justify-self: start; } .top-right { justify-self: end; display: flex; align-items: center; gap: 14px; }
+.brand { display: inline-flex; align-items: center; gap: 11px; background: none; border: 0; padding: 2px 4px; cursor: pointer; color: var(--ink); }
+.brand b { font: 500 31px/1 var(--serif); letter-spacing: -.015em; }
+.brand-mark { width: 31px; height: 31px; flex: none; }
+.link-btn { display: inline-flex; align-items: center; gap: 6px; background: none; border: 0; padding: 5px 2px; font-size: 13px; color: var(--ink-2); cursor: pointer; border-radius: 4px; white-space: nowrap; }
+.link-btn:hover, .link-btn.on { color: var(--ink); }
+.link-btn .q { display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--line-2); font-size: 10.5px; }
+.chev { width: 7px; height: 7px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg) translateY(-2px); display: inline-block; margin-left: 3px; flex: none; transition: transform .15s; }
+[aria-expanded="true"] > .chev { transform: rotate(225deg) translate(-2px, 0); }
+.menu-wrap { position: relative; }
+.menu { position: absolute; right: 0; top: calc(100% + 6px); width: 270px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow-l); padding: 6px; z-index: 35; }
+.menu button { display: block; width: 100%; text-align: left; background: none; border: 0; padding: 8px 10px; border-radius: 7px; font-size: 13.5px; cursor: pointer; color: var(--ink); }
+.menu button:hover, .menu button:focus-visible { background: var(--panel-2); }
+.nav-row { position: sticky; top: 0; z-index: 30; background: rgba(246,244,239,.94); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
+.nav-row::-webkit-scrollbar { display: none; }
+.nav-inner { display: flex; justify-content: center; gap: 38px; padding: 0 32px; min-width: max-content; }
+.nav-row button { position: relative; display: inline-flex; align-items: center; gap: 7px; background: none; border: 0; padding: 13px 1px 14px; font-size: 14px; color: var(--ink-2); cursor: pointer; white-space: nowrap; letter-spacing: .005em; transition: color .15s; }
+.nav-row button:hover { color: var(--ink); }
+.nav-row button::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--brand); transform: scaleX(0); transition: transform .2s; }
+.nav-row button[aria-current="page"] { color: var(--ink); font-weight: 550; }
+.nav-row button[aria-current="page"]::after { transform: scaleX(1); }
+.nav-row .count { font-size: 11px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+main { max-width: calc(var(--content) + 64px); width: 100%; margin: 0 auto; padding: 22px 32px 96px; outline: none; }
+.context { margin-bottom: 8px; }
+.context-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.eyebrow { font-size: 11.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-3); }
+.sample-offer { display: flex; justify-content: space-between; align-items: center; gap: 12px 20px; flex-wrap: wrap; background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--clay); border-radius: 10px; padding: 12px 15px; font-size: 13.5px; margin-bottom: 14px; color: var(--ink-2); }
+.sample-offer b { color: var(--ink); font-weight: 600; }
+.co-select { position: relative; }
+.co-btn { display: flex; align-items: center; gap: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 8px 15px 8px 9px; cursor: pointer; text-align: left; min-width: 320px; max-width: 100%; transition: border-color .15s, box-shadow .15s; }
+.co-btn:hover { border-color: var(--line-2); box-shadow: 0 2px 10px rgba(25,26,23,.06); }
+.co-btn[aria-expanded="true"] { border-color: var(--brand-2); }
+.co-btn .chev { margin-left: auto; color: var(--ink-2); }
+.mark { flex: none; display: block; }
+.co-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+.co-name { font: 500 17.5px/1.2 var(--serif); color: var(--ink); }
+.co-meta { font-size: 12px; color: var(--ink-2); margin-top: 2px; }
+.co-panel { position: absolute; right: 0; top: calc(100% + 7px); width: 430px; max-width: calc(100vw - 32px); max-height: min(70vh, 590px); overflow-y: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 15px; box-shadow: var(--shadow-l); padding: 7px; z-index: 25; animation: panel-in .14s ease-out; }
+.co-panel-head { display: flex; justify-content: space-between; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-3); padding: 7px 10px 8px; }
+.co-opt { display: flex; align-items: center; gap: 11px; width: 100%; text-align: left; background: none; border: 0; border-radius: 10px; padding: 8px 10px; cursor: pointer; }
+.co-opt:hover, .co-opt:focus-visible { background: var(--panel-2); }
+.co-opt.on { background: var(--brand-soft); }
+.co-opt .co-name { font-size: 15.5px; }
+.co-check { margin-left: auto; color: var(--brand); font-weight: 700; }
+@keyframes panel-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+@keyframes page-in { from { opacity: .25; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+#page.switching { animation: page-in .24s ease-out; }
+.page-head { margin: 22px 0 26px; align-items: flex-end; }
+.page-head p { font-size: 15px; margin-top: 7px; }
+.stack { gap: 20px; }
+.grid2, .grid-main, .lot-grid { gap: 20px; }
+.card { padding: 22px; box-shadow: none; }
+.stat { box-shadow: none; padding: 16px 18px; }
+.stat .val { font-size: 29px; }
+.lot { box-shadow: none; }
+.lot:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(25,26,23,.08); }
+.lot .swatch { height: 164px; }
+.lot-grid { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+.lot-body { padding: 14px 16px 15px; gap: 8px; }
+.lot-title { font: 500 17px/1.25 var(--serif); }
+.ex { box-shadow: none; padding: 18px 20px; }
+.hero { box-shadow: none; padding: 28px 30px; }
+.hero h2 { font-size: 27px; }
+.tour { z-index: 50; }
+@media (max-width: 1040px) { .top-left { visibility: hidden; } .nav-inner { justify-content: flex-start; gap: 26px; } }
+@media (max-width: 820px) {
+  .banner { padding: 5px 16px; font-size: 11px; }
+  .top-row { padding: 12px 16px 8px; grid-template-columns: 1fr auto 1fr; gap: 6px; }
+  .top-left { display: none; } .brand { grid-column: 2; }
+  .brand b { font-size: 25px; } .brand-mark { width: 25px; height: 25px; }
+  .top-right { grid-column: 3; gap: 8px; }
+  .top-right .link-btn#nav-how { font-size: 0; gap: 0; }
+  .top-right .link-btn#nav-how .q { font-size: 10.5px; width: 20px; height: 20px; }
+  .nav-inner { padding: 0 16px; gap: 22px; }
+  .nav-row button { padding: 11px 1px 12px; font-size: 13.5px; }
+  main { padding: 16px 16px 90px; }
+  .eyebrow { display: none; }
+  .co-btn { min-width: 0; width: 100%; }
+  .co-select { width: 100%; }
+  .co-panel { width: 100%; max-width: none; }
+  .page-head { margin: 16px 0 18px; }
+  h1 { font-size: 27px; }
+  .hero { padding: 20px; }
+  .hero h2 { font-size: 22px; }
+}
+@media (prefers-reduced-motion: reduce) { #page.switching, .co-panel { animation: none; } }
+.gain, .num { white-space: nowrap; }
 </style>
 </head>
 <body>
-<div class="app">
-  <aside class="side" id="side"></aside>
-  <div style="min-width:0">
-    <div class="banner"><span><b style="font-weight:600;color:var(--ink)">Prototype.</b> Fictional companies and simulated exchanges. No real transactions, shipments, payments or company verification.</span></div>
-    <main id="main" tabindex="-1"><div id="page"></div></main>
-  </div>
-</div>
+<div class="banner"><span><b>Prototype.</b> Fictional companies and simulated exchanges. No real transactions, shipments, payments or company verification.</span></div>
+<header id="top-row" class="top-row"></header>
+<nav id="nav-row" class="nav-row" aria-label="Main"></nav>
+<main id="main" tabindex="-1">
+  <div id="context" class="context"></div>
+  <div id="page"></div>
+</main>
 <div id="overlay"></div>
 <div id="tour"></div>
 <div id="toast" class="toast" role="status" hidden></div>
@@ -543,7 +613,7 @@ const Engine = (function () {
   /* ---- Reference data ---- */
   const CITIES = { Seoul: [0, 0], Daegu: [150, -190], Busan: [200, -270], Daejeon: [10, -140], Gwangju: [-60, -250] };
   const CATEGORIES = ["Denim", "Cotton woven", "Jersey & knit", "Viscose & satin", "Silk", "Linen", "Wool & suiting", "Canvas & twill", "Technical synthetics", "Swim & active"];
-  const FIBERS = ["cotton", "polyester", "recycled polyester", "viscose", "lyocell", "linen", "wool", "silk", "nylon", "elastane"];
+  const FIBERS = ["cotton", "recycled cotton", "polyester", "recycled polyester", "viscose", "lyocell", "linen", "hemp", "wool", "silk", "nylon", "elastane"];
   const COLORS = {
     Indigo: "#2b3f66", Black: "#232325", Navy: "#1f2c49", Grey: "#8d8f92", Ecru: "#e9e0cd", White: "#f3f0ea", Beige: "#cdb999",
     Olive: "#68683f", Sage: "#99a78a", Terracotta: "#b6653f", Burgundy: "#6d2734", Rose: "#d2a0a0", Coral: "#e27d66", Mustard: "#c79a35", Khaki: "#a39670",
@@ -848,7 +918,36 @@ const Engine = (function () {
       s.touched = true;
       s.v = 2;
     }
-    return s.v === 2 ? s : null;
+    if (s.v === 2) {
+      // Saved work is never replaced. The larger sample is offered, and added only on request.
+      s.sampleAvailable = true;
+      s.v = 3;
+    }
+    return s.v === 3 ? s : null;
+  }
+
+  /**
+   * Adds sample lots and sourcing needs the saved data lacks. Adds only: existing lots,
+   * edited values and preferences stay as they are, and lots from the earlier sample that
+   * the visitor removed do not come back. Safe to run more than once.
+   */
+  function mergeSample(s, fresh) {
+    const added = { lots: 0, needs: 0 };
+    const known = new Set(s.lots.map((l) => l.id));
+    for (const l of fresh.lots) {
+      if (Number(l.id.slice(1)) > 20 && l.id[0] === "L" && !known.has(l.id)) { s.lots.push(JSON.parse(JSON.stringify(l))); added.lots++; }
+    }
+    for (const fc of fresh.companies) {
+      const c = byId(s.companies, fc.id);
+      if (!c) continue;
+      c.profiles = c.profiles || [];
+      for (const p of fc.profiles) {
+        if (p.added3 && !c.profiles.some((x) => x.id === p.id)) { c.profiles.push(JSON.parse(JSON.stringify(p))); added.needs++; }
+      }
+    }
+    s.sampleAvailable = false;
+    s.sampleDismissed = false;
+    return added;
   }
 
   /* ---- Company-level views ---- */
@@ -1058,7 +1157,7 @@ const Engine = (function () {
   return {
     CITIES, CATEGORIES, FIBERS, COLORS, CERTS, REGIMES, DEFAULT_SETTINGS, STAGE_LABEL, STAGE,
     lotKg, distKm, fiberPct, parseComposition, compositionText, checkProfile, assess, closestMiss,
-    enumerateCycles, evaluate, clear, signature, solverStatus, marketplaceRows, migrateState, buildGraph, computeMarket, companyView, gainOf, directSwapAnalysis, auditPacking,
+    enumerateCycles, evaluate, clear, signature, solverStatus, marketplaceRows, migrateState, mergeSample, buildGraph, computeMarket, companyView, gainOf, directSwapAnalysis, auditPacking,
     propose, respond, simulateResponses, advance, dropout, revalidate, findExchange, lotLockedBy, byId, log,
   };
 })();
@@ -1109,6 +1208,22 @@ const Seed = (function () {
     ] },
   ].map((c) => Object.assign({ participating: true, overrides: {}, wishFactor: 0.9 }, c));
 
+  // Sourcing needs added with the larger sample. "added3" lets saved data receive them without touching edits.
+  const N = (name, o) => Object.assign(P(name, o), { added3: true });
+  const extraNeeds = {
+    namsan: [N("Fine silks for blouses", { categories: ["Silk"], gsmMin: 40, gsmMax: 100, qtyMin: 100, valueFactor: 0.95 })],
+    palgong: [N("Shirting for overshirts", { categories: ["Cotton woven"], fiberMin: { fiber: "cotton", min: 90 }, gsmMin: 130, gsmMax: 200, qtyMin: 200, valueFactor: 0.95 })],
+    mudeung: [N("Light linen for summer prints", { categories: ["Linen"], gsmMin: 90, gsmMax: 180, qtyMin: 150, valueFactor: 1 })],
+    yeonhui: [N("Heavy canvas for bag bodies", { categories: ["Canvas & twill"], fiberMin: { fiber: "cotton", min: 90 }, gsmMin: 300, qtyMin: 100, valueFactor: 1 })],
+    daecheong: [N("Durable backing and blackout", { categories: ["Technical synthetics"], gsmMin: 180, gsmMax: 300, qtyMin: 300, valueFactor: 0.9 })],
+    hangang: [N("Interlock for polo shirts", { categories: ["Jersey & knit"], fiberMin: { fiber: "cotton", min: 90 }, gsmMin: 190, gsmMax: 240, qtyMin: 300, valueFactor: 0.9 }), N("Wool blends for blazers", { categories: ["Wool & suiting"], fiberMin: { fiber: "wool", min: 50 }, gsmMin: 220, gsmMax: 300, qtyMin: 100, valueFactor: 0.9 })],
+    gyeongbu: [N("Stretch knits for bonding", { categories: ["Swim & active"], gsmMin: 180, gsmMax: 240, qtyMin: 200, valueFactor: 1 })],
+    dongrae: [N("Knit linings for joggers", { categories: ["Jersey & knit"], fiberMin: { fiber: "cotton", min: 60 }, gsmMin: 280, gsmMax: 360, qtyMin: 200, valueFactor: 1 })],
+    seomjin: [N("Dark viscose linings", { categories: ["Viscose & satin"], gsmMin: 100, gsmMax: 140, qtyMin: 200, colors: ["Black", "Navy"], valueFactor: 0.9 })],
+    haeundae: [N("Viscose for cover-ups", { categories: ["Viscose & satin"], gsmMin: 80, gsmMax: 120, qtyMin: 150, colors: ["Mustard", "Rose"], valueFactor: 0.9 })],
+  };
+  for (const c of companies) c.profiles = c.profiles.concat(extraNeeds[c.id] || []);
+
   const L = (id, owner, name, category, composition, gsm, width, colorFamily, color, qty, city, value, outsidePct, certs, note) =>
     ({ id, owner, name, category, composition, gsm, width, colorFamily, color, qty, city, value, outsidePct, certs: certs || [], note: note || "", photos: [], status: "active" });
 
@@ -1133,6 +1248,66 @@ const Seed = (function () {
     L("L18", "seomjin", "Coarse Linen Offcuts", "Linen", { linen: 100 }, 420, 150, "Ecru", "Natural", 900, "Gwangju", 900000, 0.5, [], "Low value, heavy to move."),
     L("L19", "haeundae", "Coral Recycled Tricot", "Swim & active", { "recycled polyester": 82, elastane: 18 }, 190, 150, "Coral", "Coral", 400, "Busan", 1400000, 0.5, ["GRS"], "Excess after colour change."),
     L("L20", "haeundae", "Black Nylon Spandex", "Swim & active", { nylon: 80, elastane: 20 }, 200, 150, "Black", "Black", 220, "Busan", 1980000, 0.5, [], "Four-way stretch."),
+    // ---- Larger sample: each lot fits what its fictional company would plausibly hold ----
+    L("L21", "namsan", "Ivory Crepe de Chine", "Silk", { silk: 100 }, 70, 114, "Ecru", "Ivory", 160, "Seoul", 3840000, 0.55, [], "Left over from a bridal capsule."),
+    L("L22", "namsan", "Camel Wool Coating", "Wool & suiting", { wool: 80, nylon: 20 }, 480, 150, "Beige", "Camel", 120, "Seoul", 4200000, 0.5, [], "Double-faced, heavy drape."),
+    L("L23", "namsan", "Navy Lyocell Twill", "Cotton woven", { lyocell: 100 }, 190, 145, "Navy", "Ink navy", 240, "Seoul", 2880000, 0.5, [], "Peached finish."),
+    L("L24", "namsan", "Rose Viscose Georgette", "Viscose & satin", { viscose: 100 }, 85, 140, "Rose", "Dusty rose", 310, "Seoul", 2480000, 0.5, [], "Print cancelled before production."),
+    L("L25", "namsan", "Black Stretch Ponte", "Jersey & knit", { viscose: 65, nylon: 30, elastane: 5 }, 300, 150, "Black", "Black", 200, "Seoul", 2400000, 0.5, [], "Stable double knit."),
+    L("L26", "namsan", "Burgundy Wool Flannel", "Wool & suiting", { wool: 100 }, 280, 150, "Burgundy", "Oxblood", 90, "Seoul", 2520000, 0.55, [], "Short end of a skirt order."),
+    L("L27", "palgong", "Ecru Organic Interlock", "Jersey & knit", { cotton: 100 }, 220, 180, "Ecru", "Undyed ecru", 380, "Daegu", 3040000, 0.5, ["GOTS"], "Clean face both sides."),
+    L("L28", "palgong", "Black 2x2 Rib", "Jersey & knit", { cotton: 92, elastane: 8 }, 260, 90, "Black", "Black", 300, "Daegu", 2100000, 0.5, [], "Tubular trim fabric."),
+    L("L29", "palgong", "Sage Cotton Pique", "Jersey & knit", { cotton: 100 }, 200, 170, "Sage", "Soft sage", 240, "Daegu", 1680000, 0.5, [], "Polo weight."),
+    L("L30", "palgong", "Charcoal Brushed Fleece", "Jersey & knit", { cotton: 60, polyester: 40 }, 340, 180, "Grey", "Charcoal", 420, "Daegu", 3780000, 0.5, [], "Three-thread, brushed back."),
+    L("L31", "palgong", "Recycled Melange Jersey", "Jersey & knit", { "recycled cotton": 60, "recycled polyester": 40 }, 170, 180, "Grey", "Oat melange", 340, "Daegu", 1700000, 0.5, ["GRS"], "Natural melange from recycled fibre."),
+    L("L32", "palgong", "Burgundy Viscose Jersey", "Jersey & knit", { viscose: 95, elastane: 5 }, 190, 160, "Burgundy", "Wine", 200, "Daegu", 1800000, 0.5, [], "Fluid hand."),
+    L("L33", "mudeung", "Black Viscose Crepe", "Viscose & satin", { viscose: 100 }, 135, 140, "Black", "Black", 450, "Gwangju", 3600000, 0.5, [], "Moss crepe texture."),
+    L("L34", "mudeung", "Sage Viscose Twill", "Viscose & satin", { viscose: 100 }, 150, 145, "Sage", "Eucalyptus", 260, "Gwangju", 2340000, 0.5, [], "Sand-washed."),
+    L("L35", "mudeung", "Ivory Silk Charmeuse", "Silk", { silk: 100 }, 90, 114, "Ecru", "Pearl", 120, "Gwangju", 4200000, 0.6, [], "19 momme, kept in original rolls."),
+    L("L36", "mudeung", "Mustard Viscose Challis", "Viscose & satin", { viscose: 100 }, 110, 140, "Mustard", "Turmeric", 380, "Gwangju", 2660000, 0.5, [], "Light, matte."),
+    L("L37", "mudeung", "Rose Silk Organza", "Silk", { silk: 100 }, 45, 112, "Rose", "Blush", 90, "Gwangju", 2250000, 0.6, [], "Crisp, sheer."),
+    L("L38", "mudeung", "Navy Lyocell Satin", "Viscose & satin", { lyocell: 100 }, 140, 145, "Navy", "Midnight", 200, "Gwangju", 2400000, 0.5, [], "Soft sheen."),
+    L("L39", "yeonhui", "Black Waxed Cotton", "Canvas & twill", { cotton: 100 }, 360, 150, "Black", "Black", 110, "Seoul", 1760000, 0.5, [], "Paraffin finish."),
+    L("L40", "yeonhui", "Tan Cotton Duck", "Canvas & twill", { cotton: 100 }, 400, 150, "Khaki", "Saddle tan", 90, "Seoul", 990000, 0.5, [], "Bag-weight remnant."),
+    L("L41", "yeonhui", "Olive Nylon Taffeta", "Technical synthetics", { nylon: 100 }, 75, 145, "Olive", "Olive", 180, "Seoul", 1260000, 0.5, [], "Calendered lining."),
+    L("L42", "yeonhui", "Burgundy Cotton Velvet", "Cotton woven", { cotton: 100 }, 320, 140, "Burgundy", "Deep wine", 70, "Seoul", 1400000, 0.55, [], "Sample run, slight crush marks."),
+    L("L43", "yeonhui", "Natural Cotton Drill", "Canvas & twill", { cotton: 100 }, 280, 150, "Ecru", "Loomstate", 130, "Seoul", 780000, 0.5, [], "Unfinished."),
+    L("L44", "daecheong", "Ecru Cotton Sheeting", "Cotton woven", { cotton: 100 }, 130, 280, "Ecru", "Ecru", 900, "Daejeon", 4500000, 0.5, [], "Wide width, plain weave."),
+    L("L45", "daecheong", "Slate Linen Upholstery", "Linen", { linen: 100 }, 310, 150, "Grey", "Slate", 220, "Daejeon", 3300000, 0.5, [], "Martindale untested."),
+    L("L46", "daecheong", "Terracotta Cotton Panama", "Cotton woven", { cotton: 100 }, 260, 150, "Terracotta", "Baked clay", 340, "Daejeon", 2380000, 0.5, [], "Cushion range overrun."),
+    L("L47", "daecheong", "Navy Striped Ticking", "Cotton woven", { cotton: 100 }, 240, 150, "Navy", "Navy and white", 280, "Daejeon", 1680000, 0.5, [], "Yarn-dyed stripe."),
+    L("L48", "daecheong", "White Cotton Percale", "Cotton woven", { cotton: 100 }, 120, 240, "White", "Optic white", 700, "Daejeon", 4200000, 0.5, ["OEKO-TEX"], "200 thread count."),
+    L("L49", "daecheong", "Beige Recycled Blackout", "Technical synthetics", { "recycled polyester": 100 }, 250, 280, "Beige", "Stone", 400, "Daejeon", 2400000, 0.5, ["GRS"], "Three-pass coating."),
+    L("L50", "hangang", "White Poly-Cotton Shirting", "Cotton woven", { polyester: 65, cotton: 35 }, 120, 150, "White", "White", 1000, "Seoul", 3500000, 0.5, [], "Easy-care finish."),
+    L("L51", "hangang", "Black Uniform Gabardine", "Wool & suiting", { polyester: 70, wool: 30 }, 230, 150, "Black", "Black", 400, "Seoul", 3600000, 0.5, [], "Airline contract surplus."),
+    L("L52", "hangang", "Grey Trouser Twill", "Canvas & twill", { polyester: 65, cotton: 35 }, 240, 150, "Grey", "Mid grey", 600, "Seoul", 2700000, 0.5, [], "Soil-release finish."),
+    L("L53", "hangang", "Olive Cotton Work Drill", "Canvas & twill", { cotton: 100 }, 300, 150, "Olive", "Field olive", 350, "Seoul", 2100000, 0.5, [], "Pre-shrunk."),
+    L("L54", "hangang", "Navy Polyester Pique", "Jersey & knit", { polyester: 100 }, 180, 170, "Navy", "Navy", 500, "Seoul", 2000000, 0.5, [], "Wicking finish."),
+    L("L55", "hangang", "Khaki Recycled Work Twill", "Canvas & twill", { "recycled polyester": 65, cotton: 35 }, 220, 150, "Khaki", "Khaki", 450, "Seoul", 2250000, 0.5, ["GRS"], "Recycled uniform programme ended."),
+    L("L56", "gyeongbu", "Navy Softshell", "Technical synthetics", { polyester: 92, elastane: 8 }, 320, 145, "Navy", "Navy", 300, "Daegu", 4500000, 0.5, [], "Three-layer bonded."),
+    L("L57", "gyeongbu", "Olive High-Tenacity Nylon", "Technical synthetics", { nylon: 100 }, 330, 150, "Olive", "Ranger olive", 260, "Daegu", 3900000, 0.5, [], "PU coated, abrasion resistant."),
+    L("L58", "gyeongbu", "White Coated Taffeta", "Technical synthetics", { polyester: 100 }, 90, 150, "White", "White", 800, "Daegu", 2400000, 0.5, [], "Silicone coating."),
+    L("L59", "gyeongbu", "Black Spacer Mesh", "Technical synthetics", { polyester: 100 }, 120, 160, "Black", "Black", 450, "Daegu", 1350000, 0.5, [], "Open hex structure."),
+    L("L60", "gyeongbu", "Grey Brushed Tricot", "Technical synthetics", { polyester: 100 }, 150, 160, "Grey", "Pewter", 380, "Daegu", 1520000, 0.5, [], "Brushed backing."),
+    L("L61", "gyeongbu", "Khaki Waxed Poly Canvas", "Canvas & twill", { polyester: 65, cotton: 35 }, 280, 150, "Khaki", "Khaki", 320, "Daegu", 2240000, 0.5, [], "Water repellent."),
+    L("L62", "dongrae", "Mid-Wash Stretch Denim", "Denim", { cotton: 98, elastane: 2 }, 290, 150, "Indigo", "Mid wash", 500, "Busan", 4000000, 0.5, [], "Enzyme washed."),
+    L("L63", "dongrae", "Ecru Undyed Denim", "Denim", { cotton: 100 }, 340, 150, "Ecru", "Natural", 260, "Busan", 2600000, 0.5, [], "Greige selvedge."),
+    L("L64", "dongrae", "Light Indigo Chambray", "Cotton woven", { cotton: 100 }, 150, 150, "Indigo", "Light indigo", 340, "Busan", 2040000, 0.5, [], "Shirting weight."),
+    L("L65", "dongrae", "Recycled Cotton Denim", "Denim", { cotton: 60, "recycled cotton": 40 }, 360, 150, "Indigo", "Dark indigo", 420, "Busan", 3360000, 0.5, ["GRS"], "Post-industrial recycled content."),
+    L("L66", "dongrae", "Black Pocketing Twill", "Canvas & twill", { polyester: 65, cotton: 35 }, 120, 150, "Black", "Black", 600, "Busan", 1500000, 0.5, [], "Trim stock."),
+    L("L67", "dongrae", "Rinse Denim Short Ends", "Denim", { cotton: 100 }, 400, 140, "Indigo", "Rinse", 800, "Busan", 1200000, 0.5, [], "Mixed roll lengths, heavy to ship."),
+    L("L68", "seomjin", "White Handkerchief Linen", "Linen", { linen: 100 }, 110, 150, "White", "White", 240, "Gwangju", 2640000, 0.5, [], "Fine, slightly sheer."),
+    L("L69", "seomjin", "Olive Linen Twill", "Linen", { linen: 100 }, 240, 145, "Olive", "Moss", 200, "Gwangju", 2200000, 0.5, [], "Garment-dyed look."),
+    L("L70", "seomjin", "Navy Linen-Viscose", "Linen", { linen: 55, viscose: 45 }, 170, 140, "Navy", "Navy", 320, "Gwangju", 2560000, 0.5, [], "Softer drape."),
+    L("L71", "seomjin", "Stonewashed Linen Canvas", "Linen", { linen: 100 }, 340, 150, "Grey", "Pebble", 150, "Gwangju", 1800000, 0.5, [], "Heavy washed hand."),
+    L("L72", "seomjin", "Terracotta Linen Gauze", "Linen", { linen: 100 }, 95, 140, "Terracotta", "Rust", 180, "Gwangju", 1620000, 0.5, [], "Open weave."),
+    L("L73", "seomjin", "Natural Hemp Blend", "Linen", { hemp: 55, cotton: 45 }, 210, 150, "Beige", "Flax", 260, "Gwangju", 2080000, 0.5, [], "Dry, crisp hand."),
+    L("L74", "haeundae", "Navy Swim Tricot", "Swim & active", { nylon: 78, elastane: 22 }, 190, 150, "Navy", "Deep navy", 260, "Busan", 2600000, 0.5, [], "Chlorine resistant."),
+    L("L75", "haeundae", "Sage Ribbed Swim", "Swim & active", { nylon: 82, elastane: 18 }, 220, 150, "Sage", "Sage", 180, "Busan", 1980000, 0.5, [], "Ribbed texture."),
+    L("L76", "haeundae", "White Mesh Lining", "Swim & active", { polyester: 100 }, 90, 160, "White", "White", 500, "Busan", 1000000, 0.5, [], "Soft handfeel."),
+    L("L77", "haeundae", "Black Performance Interlock", "Swim & active", { polyester: 88, elastane: 12 }, 230, 160, "Black", "Black", 420, "Busan", 2940000, 0.5, [], "Squat-proof weight."),
+    L("L78", "haeundae", "Terracotta Seamless Knit", "Swim & active", { nylon: 90, elastane: 10 }, 250, 150, "Terracotta", "Clay", 120, "Busan", 1440000, 0.5, [], "Short sample run."),
+    L("L79", "haeundae", "Grey Quick-Dry Pique", "Swim & active", { polyester: 100 }, 160, 170, "Grey", "Marl grey", 340, "Busan", 1360000, 0.5, [], "Moisture wicking."),
   ];
 
   /** Fictional past entries so the Activity page has history on first open. */
@@ -1144,7 +1319,7 @@ const Seed = (function () {
 
   function fresh() {
     return JSON.parse(JSON.stringify({
-      v: 2, current: "namsan", companies, lots, history, exchanges: [], declined: {}, activity: [], seq: 100,
+      v: 3, current: "namsan", companies, lots, history, exchanges: [], declined: {}, activity: [], seq: 100,
       settings: Object.assign({}, Engine.DEFAULT_SETTINGS), nextLot: 1,
     }));
   }
@@ -1215,20 +1390,78 @@ const Checks = (function () {
         const s = Seed.fresh();
         const base = { q: "", cat: "all", fiber: "all", city: "all", color: "all", gsmMin: "", gsmMax: "", qtyMin: "", fit: "all" };
         const n = (o) => Engine.marketplaceRows(s, "namsan", Object.assign({}, base, o)).length;
-        return [["No filter excludes own lots", 18, n({})], ["Search is case-insensitive", 1, n({ q: "VISCOSE SATIN" })], ["Search matches company", 2, n({ q: "palgong" })], ["Blank search spaces ignored", 18, n({ q: "   " })], ["GSM range", 1, n({ gsmMin: "400", gsmMax: "450" })], ["Blank numeric filter ignored", 18, n({ gsmMin: "" })], ["Fits only", 3, n({ fit: "fit" })]];
+        const others = s.lots.filter((l) => l.owner !== "namsan").length;
+        const byHand = s.lots.filter((l) => l.owner !== "namsan" && l.gsm >= 400 && l.gsm <= 450).length;
+        return [["No filter excludes own lots", others, n({})], ["Search is case-insensitive", 1, n({ q: "TERRACOTTA VISCOSE SATIN" })], ["Search matches company", 8, n({ q: "palgong" })], ["Blank search spaces ignored", others, n({ q: "   " })], ["GSM range", byHand, n({ gsmMin: "400", gsmMax: "450" })], ["Blank numeric filter ignored", others, n({ gsmMin: "" })], ["Fits only is a real subset", "yes", n({ fit: "fit" }) > 0 && n({ fit: "fit" }) < others ? "yes" : "no"]];
       }],
-      ["R9. Saved data from the earlier version is upgraded, keeping edits", () => {
+      ["R9. Saved data from earlier versions is upgraded, keeping edits", () => {
         const old = Seed.fresh();
         old.v = 1; delete old.welcomed;
         old.companies.find((c) => c.id === "namsan").hurdle = 100000;
         old.companies.find((c) => c.id === "gyeongbu").hurdle = 777;
         old.lots[0].name = "Edited name";
         const m = Engine.migrateState(JSON.parse(JSON.stringify(old)));
-        return [["Version", 2, m.v], ["Edit kept", "Edited name", m.lots[0].name], ["Old default updated", 300000, m.companies.find((c) => c.id === "namsan").hurdle], ["User value kept", 777, m.companies.find((c) => c.id === "gyeongbu").hurdle], ["Welcome not re-shown", "yes", m.welcomed ? "yes" : "no"], ["Unknown version rejected", "yes", Engine.migrateState({ v: 9, lots: [], companies: [] }) === null ? "yes" : "no"]];
+        return [["Version", 3, m.v], ["Edit kept", "Edited name", m.lots[0].name], ["Old default updated", 300000, m.companies.find((c) => c.id === "namsan").hurdle], ["User value kept", 777, m.companies.find((c) => c.id === "gyeongbu").hurdle], ["Welcome not re-shown", "yes", m.welcomed ? "yes" : "no"], ["Larger sample offered, not forced", "yes", m.sampleAvailable ? "yes" : "no"], ["Unknown version rejected", "yes", Engine.migrateState({ v: 9, lots: [], companies: [] }) === null ? "yes" : "no"]];
       }],
       ["R10. Demo data shows feasible versus ready", () => {
         const s = Seed.fresh(), M = Engine.computeMarket(s), v = Engine.companyView(s, M, "namsan");
-        return [["Namsan ready options", 1, v.ready.length], ["Namsan below its minimum", 1, v.belowMin.length], ["Below-minimum option", "L01>L03>L06>L07", v.belowMin[0].sig], ["Lots moved, direct swaps", 2, M.packs[2].selected.reduce((a, c) => a + c.k, 0)], ["Lots moved, up to 3-way", 5, M.packs[3].selected.reduce((a, c) => a + c.k, 0)], ["Lots moved, up to 4-way", 9, M.packs[4].selected.reduce((a, c) => a + c.k, 0)], ["Solver status", "optimal", M.status.code]];
+        const moved = (L) => M.packs[L].selected.reduce((a, c) => a + c.k, 0);
+        return [["Namsan has ready options", "yes", v.ready.length > 0 ? "yes" : "no"], ["Namsan also has below-minimum options", "yes", v.belowMin.length > 0 ? "yes" : "no"], ["Earlier below-minimum example still blocked", "no", M.bySig.get("L01>L03>L06>L07").ready ? "yes" : "no"], ["Multi-way moves more than direct swaps", "yes", moved(3) > moved(2) && moved(4) >= moved(3) ? "yes" : "no"], ["Solver status", "optimal", M.status.code], ["Audit", "pass", M.audit.pass ? "pass" : "fail"]];
+      }],
+      ["R11. Larger sample: size, spread and valid specifications", () => {
+        const s = Seed.fresh(), L = s.lots;
+        const per = s.companies.map((c) => L.filter((l) => l.owner === c.id).length);
+        const cats = new Set(L.map((l) => l.category));
+        const recycled = L.filter((l) => l.composition["recycled polyester"] || l.composition["recycled cotton"]).length;
+        return [["Total within 70-90", "yes", L.length >= 70 && L.length <= 90 ? "yes" : "no"], ["Every company within 6-10", "yes", per.every((n) => n >= 6 && n <= 10) ? "yes" : "no"], ["Unique lot ids", L.length, new Set(L.map((l) => l.id)).size], ["Unique lot names", L.length, new Set(L.map((l) => l.name)).size], ["Compositions total 100%", "yes", L.every((l) => Object.values(l.composition).reduce((a, b) => a + b, 0) === 100) ? "yes" : "no"], ["Fibers all recognized", "yes", L.every((l) => Object.keys(l.composition).every((f) => Engine.FIBERS.includes(f))) ? "yes" : "no"], ["Specifications positive", "yes", L.every((l) => l.gsm > 0 && l.width > 0 && l.qty > 0 && l.value > 0 && l.outsidePct > 0 && l.outsidePct < 1) ? "yes" : "no"], ["Colors known", "yes", L.every((l) => Engine.COLORS[l.colorFamily]) ? "yes" : "no"], ["All 10 categories present", 10, cats.size], ["Includes recycled fabrics", "yes", recycled >= 3 ? "yes" : "no"]];
+      }],
+      ["R12. Not everything matches, and results are computed", () => {
+        const s = Seed.fresh(), M = Engine.computeMarket(s);
+        const wanted = s.lots.filter((l) => s.companies.some((c) => Engine.assess(c, l).accepted)).length;
+        const noRoute = s.lots.filter((l) => !M.pool.some((i) => i.lots.includes(l.id))).length;
+        const before = M.pool.length;
+        s.companies.find((c) => c.id === "mudeung").profiles = [];
+        const after = Engine.computeMarket(s).pool.length;
+        return [["Some lots nobody asks for", "yes", wanted < s.lots.length ? "yes" : "no"], ["Some lots with no ready exchange", "yes", noRoute > 0 ? "yes" : "no"], ["Some exchanges fail the economics", "yes", M.items.some((i) => !i.eligible) ? "yes" : "no"], ["Removing a company's needs reduces options", "yes", after < before ? "yes" : "no"]];
+      }],
+      ["R13. Each lot goes to at most one exchange in the larger market", () => {
+        const s = Seed.fresh(), M = Engine.computeMarket(s);
+        const counts = [2, 3, 4].map((L) => { const u = M.packs[L].selected.flatMap((c) => c.lots); return u.length - new Set(u).size; });
+        const multi = s.companies.filter((c) => M.recommended.selected.filter((x) => x.companies.includes(c.id)).length > 1).length;
+        return [["Lots repeated across all caps", 0, counts.reduce((a, b) => a + b, 0)], ["Some company is in several exchanges", "yes", multi > 0 ? "yes" : "no"], ["Search complete", "no", M.truncated ? "yes" : "no"]];
+      }],
+      ["R14. Guided demonstration still works on the larger sample", () => {
+        const s = Seed.fresh(), M = Engine.computeMarket(s), G = M.bySig.get("L01>L03>L05"), v = Engine.companyView(s, M, "namsan");
+        const direct = v.workable("L01").filter((i) => i.k === 2).length;
+        // Every pair in the guided loop must refuse the direct swap.
+        const pairs = Engine.directSwapAnalysis(s, G).filter((d) => d.accepted).length;
+        Engine.propose(s, G); Engine.respond(s, G.sig, "namsan", "approved"); Engine.simulateResponses(s, G.sig, "namsan");
+        const status = s.exchanges[0].status;
+        const u = Seed.tourLot();
+        s.lots.push(Object.assign({ id: "U01", owner: "namsan", status: "active", photos: [] }, u, { composition: Engine.parseComposition(u.compositionText).composition }));
+        const V = Engine.companyView(s, Engine.computeMarket(s), "namsan");
+        return [["Guided lots unchanged", "L01>L03>L05", G.sig], ["Ready", "yes", G.ready ? "yes" : "no"], ["In the recommended set", "yes", G.recommended ? "yes" : "no"], ["Denim has no direct swap", 0, direct], ["Pairs that could swap directly", 0, pairs], ["All simulated companies approve", "confirmed", status], ["Tour poplin creates the direct swap", "yes", V.routes("U01").some((i) => i.sig === "L17>U01") ? "yes" : "no"]];
+      }],
+      ["R15. Adding the larger sample never overwrites saved work", () => {
+        const fresh = Seed.fresh();
+        const old = Seed.fresh();
+        old.lots = old.lots.filter((l) => Number(l.id.slice(1)) <= 20 && l.id !== "L05");
+        old.companies.forEach((c) => { c.profiles = c.profiles.filter((p) => !p.added3); });
+        old.lots.find((l) => l.id === "L01").gsm = 111;
+        old.lots.push({ id: "U07", owner: "namsan", name: "My own lot", category: "Silk", composition: { silk: 100 }, gsm: 50, width: 100, colorFamily: "Black", qty: 10, city: "Seoul", value: 1000, outsidePct: 0.5, certs: [], photos: [], status: "active" });
+        old.companies[0].profiles[0].qtyMin = 999;
+        old.current = "seomjin";
+        old.v = 2;
+        const s = Engine.migrateState(old);
+        const untouched = s.lots.length;
+        const a = Engine.mergeSample(s, fresh);
+        const n = s.lots.length;
+        const again = Engine.mergeSample(s, fresh);
+        return [["Nothing added before asking", 20, untouched], ["Lots added", fresh.lots.length - 20, a.lots], ["Own lot kept", "My own lot", (s.lots.find((l) => l.id === "U07") || {}).name], ["Edited lot kept", 111, s.lots.find((l) => l.id === "L01").gsm], ["Edited preference kept", 999, s.companies[0].profiles[0].qtyMin], ["Removed lot stays removed", "yes", s.lots.some((l) => l.id === "L05") ? "no" : "yes"], ["Current company kept", "seomjin", s.current], ["Second run adds nothing", 0, again.lots + again.needs], ["Total unchanged after second run", n, s.lots.length], ["Offer cleared", "no", s.sampleAvailable ? "yes" : "no"]];
+      }],
+      ["R16. Matching stays responsive on the larger sample", () => {
+        const s = Seed.fresh(), t = Date.now(), M = Engine.computeMarket(s), ms = Date.now() - t;
+        return [["Under 500 ms", "yes", ms < 500 ? "yes" : "no"], ["Status proven", "yes", M.status.proven ? "yes" : "no"]];
       }],
     ];
   }
@@ -1349,7 +1582,14 @@ const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "
 function loadState() {
   try {
     const raw = localStorage.getItem(STORE_KEY);
-    if (raw) { const s = Engine.migrateState(JSON.parse(raw)); if (s) return s; }
+    if (raw) {
+      const s = Engine.migrateState(JSON.parse(raw));
+      if (s) {
+        // Nothing edited means nothing to protect, so the larger sample can load directly.
+        if (s.sampleAvailable && !s.touched) Engine.mergeSample(s, Seed.fresh());
+        return s;
+      }
+    }
   } catch (e) { /* storage unavailable: run in memory */ }
   return null;
 }
@@ -1363,7 +1603,7 @@ let M = null;
 const ui = {
   page: "dashboard", sig: null, drawer: null, tour: null, toast: null,
   mp: { q: "", cat: "all", fiber: "all", city: "all", color: "all", gsmMin: "", gsmMax: "", qtyMin: "", fit: "all" },
-  matchK: "all", matchScope: "mine", invFilter: "active", actScope: "mine", rulesOpen: false, checks: null, lab: null, tour: null, tourKey: "quick",
+  matchK: "all", matchScope: "mine", invFilter: "active", actScope: "mine", rulesOpen: false, checks: null, lab: null, tour: null, tourKey: "quick", coOpen: false, demoOpen: false, listCap: { ready: 12, below: 6, blocked: 6 },
 };
 const me = () => Engine.byId(state.companies, state.current);
 const coOf = (id) => Engine.byId(state.companies, id);
@@ -1378,7 +1618,7 @@ const won = (x) => {
 };
 const signed = (x) => (x >= 0 ? "+" : "") + won(x);
 const initials = (name) => name.split(/\s+/).filter((w) => /^[A-Z]/.test(w)).slice(0, 2).map((w) => w[0]).join("");
-const monogram = (c, small) => `<span class="mono ${small ? "sm" : ""}" style="background:${c ? c.hue || "#555" : "#555"}">${esc(c ? initials(c.name) : "?")}</span>`;
+const monogram = (c, small) => brandMark(c, small ? 24 : 34);
 const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
 const ago = (t) => {
   const d = (Date.now() - t) / 864e5;
@@ -1496,7 +1736,8 @@ function exchangeGraph(item, W, o = {}) {
   nodes.forEach((n) => {
     const c = coOf(n.m.company), isMe = n.m.company === (o.current || state.current);
     circles += `<circle cx="${n.x}" cy="${n.y}" r="${nodeR}" fill="${c ? c.hue : "#555"}" stroke="${isMe ? "var(--clay)" : "var(--panel)"}" stroke-width="${isMe ? 3 : 2}"/>`;
-    circles += `<text x="${n.x}" y="${n.y + (compact ? 3.5 : 4.5)}" text-anchor="middle" font-size="${compact ? 10 : 12}" font-weight="650" fill="#fff">${esc(initials(n.m.companyName))}</text>`;
+    circles += c ? brandMark(c, nodeR * 2, { shape: "circle", at: [n.x - nodeR, n.y - nodeR] }) : "";
+    circles += `<circle cx="${n.x}" cy="${n.y}" r="${nodeR}" fill="none" stroke="${isMe ? "var(--clay)" : "var(--panel)"}" stroke-width="${isMe ? 3 : 2}"/>`;
     if (!o.noNames) {
       // Side nodes of a 4-way ring: label sits outside the ring so it never crosses an arrow.
       const side = k === 4 && Math.abs(n.y - cy) < 2 && !compact;
@@ -1553,6 +1794,37 @@ function readPhoto(file) {
     fr.readAsDataURL(file);
   });
 }
+
+/* ---- Fictional brand marks: drawn from each company's id, no real logos ---- */
+const BRANDS = {
+  namsan: ["circle", "arch"], palgong: ["square", "rib"], mudeung: ["circle", "wave"], yeonhui: ["square", "chevron"], daecheong: ["squircle", "grid"],
+  hangang: ["square", "bars"], gyeongbu: ["squircle", "hex"], dongrae: ["circle", "twill"], seomjin: ["squircle", "slub"], haeundae: ["circle", "sun"],
+};
+let markSeq = 0;
+function brandMotif(kind) {
+  const line = (a, b, c, d, w = 1.4) => `<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" stroke="#fff" stroke-width="${w}" opacity=".3"/>`;
+  const out = [];
+  if (kind === "arch") for (const r of [14, 20, 26]) out.push(`<path d="M${20 - r} 42A${r} ${r} 0 0 1 ${20 + r} 42" fill="none" stroke="#fff" stroke-width="1.5" opacity=".3"/>`);
+  if (kind === "rib") for (let x = 3; x < 40; x += 5) out.push(line(x, 0, x, 40, 1.6));
+  if (kind === "wave") for (const y of [8, 15, 29, 36]) out.push(`<path d="M-2 ${y}q7 -6 14 0t14 0t14 0" fill="none" stroke="#fff" stroke-width="1.4" opacity=".3"/>`);
+  if (kind === "chevron") for (const y of [-2, 8, 26, 36]) out.push(`<path d="M-2 ${y + 8}L20 ${y}L42 ${y + 8}" fill="none" stroke="#fff" stroke-width="1.6" opacity=".3"/>`);
+  if (kind === "grid") { for (let i = 5; i < 40; i += 10) { out.push(line(i, 0, i, 40, 1.1)); out.push(line(0, i, 40, i, 1.1)); } }
+  if (kind === "bars") for (const y of [4, 10, 30, 36]) out.push(line(0, y, 40, y, 2.2));
+  if (kind === "hex") for (const [x, y] of [[8, 6], [32, 6], [8, 34], [32, 34], [20, 0], [20, 40]]) out.push(`<path d="M${x} ${y - 6}l5 3v6l-5 3l-5 -3v-6z" fill="none" stroke="#fff" stroke-width="1.2" opacity=".35"/>`);
+  if (kind === "twill") for (let i = -40; i < 40; i += 6) out.push(line(i, 40, i + 40, 0, 1.3));
+  if (kind === "slub") for (const [y, w] of [[5, 1], [9, 2], [13, 1], [29, 2], [33, 1], [37, 1.6]]) out.push(line(0, y, 40, y + 1, w));
+  if (kind === "sun") for (let a = 0; a < 360; a += 30) out.push(line(20 + 13 * Math.cos(a * Math.PI / 180), 20 + 13 * Math.sin(a * Math.PI / 180), 20 + 28 * Math.cos(a * Math.PI / 180), 20 + 28 * Math.sin(a * Math.PI / 180), 1.4));
+  return out.join("");
+}
+function brandMark(c, size, o = {}) {
+  if (!c) return "";
+  const [shape0, motif] = BRANDS[c.id] || ["circle", "ring"];
+  const shape = o.shape || shape0, id = "bm" + ++markSeq;
+  const clip = shape === "circle" ? `<circle cx="20" cy="20" r="20"/>` : `<rect width="40" height="40" rx="${shape === "square" ? 7 : 13}"/>`;
+  const body = `<clipPath id="${id}">${clip}</clipPath><g clip-path="url(#${id})"><rect width="40" height="40" fill="${c.hue || "#555"}"/>${brandMotif(motif)}</g><text x="20" y="26.5" text-anchor="middle" font-family="var(--serif)" font-size="17" font-weight="500" fill="#fff">${esc(initials(c.name))}</text>`;
+  if (o.at) return `<svg x="${o.at[0]}" y="${o.at[1]}" width="${size}" height="${size}" viewBox="0 0 40 40" aria-hidden="true">${body}</svg>`;
+  return `<svg class="mark" width="${size}" height="${size}" viewBox="0 0 40 40" aria-hidden="true">${body}</svg>`;
+}
 </script>
 <script>
 /* ===========================================================================
@@ -1566,9 +1838,17 @@ const prefersStill = () => matchMedia && matchMedia("(prefers-reduced-motion: re
 
 /** A color belongs to the exchange, not its position in a filtered list. */
 function loopColor(sig) {
-  const all = M.items.filter((i) => i.eligible).map((i) => i.sig).sort();
-  const at = all.indexOf(sig);
-  return at >= 0 && at < LOOP_COLORS.length ? LOOP_COLORS[at] : "#7c7c72";
+  if (!M.loopColors) {
+    M.loopColors = new Map();
+    M.recommended.selected.map((i) => i.sig).sort().forEach((s, n) => M.loopColors.set(s, LOOP_COLORS[n % LOOP_COLORS.length]));
+  }
+  return M.loopColors.get(sig) || "#7c7c72";
+}
+const NET_DRAW_LIMIT = 14;
+function netDrawn(opts, sel) {
+  const d = opts.slice(0, NET_DRAW_LIMIT);
+  if (sel && !d.includes(sel)) d[d.length - 1] = sel;
+  return d;
 }
 function netOptions() {
   const c = state.current, L = state.settings.L;
@@ -1627,7 +1907,7 @@ function netSvg(opts, sel, W) {
     it.members.forEach((m, hop) => {
       const e = isSel && it.k === 2 ? edgePath(m.company, m.toCompany, 0, R * 0.62) : edgePath(m.company, m.toCompany, isSel ? 0.16 : bend);
       if (!isSel) {
-        back += `<path d="${e.d}" fill="none" stroke="${color}" stroke-width="1.6" opacity=".28" style="cursor:pointer" data-act="net-select" data-sig="${esc(it.sig)}"><title>${esc(m.companyName)} sends ${esc(m.lotName)} to ${esc(m.toName)}</title></path>`;
+        back += `<path d="${e.d}" fill="none" stroke="${color}" stroke-width="1.4" opacity=".16" style="cursor:pointer" data-act="net-select" data-sig="${esc(it.sig)}"><title>${esc(m.companyName)} sends ${esc(m.lotName)} to ${esc(m.toName)}</title></path>`;
         return;
       }
       front += `<path class="net-hop" data-hop="${hop}" id="${uid}p${hop}" d="${e.d}" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round" marker-end="url(#${uid}m)"><title>${esc(m.companyName)} sends ${esc(m.lotName)} to ${esc(m.toName)}</title></path>`;
@@ -1660,7 +1940,7 @@ function netSvg(opts, sel, W) {
     nodes += `<g data-act="net-node" data-co="${c.id}" id="net-node-${c.id}" role="button" tabindex="0" aria-label="${esc(c.name)}: show its exchanges" style="cursor:pointer" opacity="${dim ? 0.38 : 1}"><title>${esc(c.name)}: ${esc(c.kind)}, ${esc(c.city)}</title>
       <circle cx="${p.x}" cy="${p.y}" r="${nodeR + 6}" fill="transparent"/>
       <circle cx="${p.x}" cy="${p.y}" r="${nodeR}" fill="${c.hue}" stroke="${isMe ? "var(--clay)" : "var(--panel)"}" stroke-width="${isMe ? 3 : 2}"/>
-      <text x="${p.x}" y="${p.y + 4}" text-anchor="middle" font-size="${showNames ? 11 : 10}" font-weight="650" fill="#fff">${esc(initials(c.name))}</text>${label}</g>`;
+      ${brandMark(c, nodeR * 2, { shape: "circle", at: [p.x - nodeR, p.y - nodeR] })}<circle cx="${p.x}" cy="${p.y}" r="${nodeR}" fill="none" stroke="${isMe ? "var(--clay)" : "var(--panel)"}" stroke-width="${isMe ? 3 : 2}"/>${label}</g>`;
   });
   return `<svg viewBox="0 0 ${W} ${H}" role="group" aria-label="Exchange network: companies on a ring, with each exchange drawn as a loop"><defs>${defs}</defs><g>${back}</g><g>${front}</g><g>${chips}</g><g>${nodes}</g></svg>`;
 }
@@ -1693,7 +1973,7 @@ function renderNetwork() {
         <div class="row" style="margin-top:8px"><button class="btn sm" id="net-play" data-act="net-play">Play</button><button class="btn sm primary" id="net-open" data-act="open-ex" data-sig="${esc(sel.sig)}">Open details</button></div>
         ${sel.companies.includes(me0) ? `<div class="between small" style="margin-top:10px"><span class="muted">${esc(me().name)}'s estimated gain</span><b class="num">${signed(Engine.gainOf(sel, me0))}</b></div>` : `<div class="between small" style="margin-top:10px"><span class="muted">Total estimated gain</span><b class="num">${signed(sel.surplus)}</b></div>`}
       ` : `<div class="empty" style="padding:18px"><h3>No loops to show</h3><p class="small">Nothing qualifies at these settings. Try a larger exchange size or another view.</p></div>`}
-      ${opts.length > 1 ? `<h4 style="margin-top:14px">Exchanges (${opts.length})</h4><div class="net-opts">${opts.map((o, i) => `<button class="net-opt" id="net-opt-${i}" data-act="net-select" data-sig="${esc(o.sig)}" aria-pressed="${sel && o.sig === sel.sig}"><i style="background:${loopColor(o.sig)}"></i><span>${o.k}-way: ${esc(o.companies.map((id) => initials(coOf(id).name)).join(" → "))}</span></button>`).join("")}</div>` : ""}
+      ${opts.length > 1 ? `<h4 style="margin-top:14px">Exchanges (${opts.length})</h4>${opts.length > NET_DRAW_LIMIT ? `<p class="small faint">The ring shows ${NET_DRAW_LIMIT} loops so it stays readable. Every option is listed here.</p>` : ""}<div class="net-opts">${opts.map((o, i) => `<button class="net-opt" id="net-opt-${i}" data-act="net-select" data-sig="${esc(o.sig)}" aria-pressed="${sel && o.sig === sel.sig}"><i style="background:${loopColor(o.sig)}"></i><span>${o.k}-way: ${esc(o.companies.map((id) => initials(coOf(id).name)).join(" → "))}</span></button>`).join("")}</div>` : ""}
       </div>
     </div></section>`;
   drawNetCanvas(opts, sel);
@@ -1701,7 +1981,9 @@ function renderNetwork() {
 }
 function drawNetCanvas(opts, sel) {
   const el = $("#net-canvas");
-  if (el) el.innerHTML = netSvg(opts || netOptions(), sel === undefined ? netSelected(netOptions()) : sel, Math.max(el.clientWidth || 560, 280));
+  if (!el) return;
+  const list = opts || netOptions(), chosen = sel === undefined ? netSelected(list) : sel;
+  el.innerHTML = netSvg(netDrawn(list, chosen), chosen, Math.max(el.clientWidth || 560, 280));
 }
 /** Highlights one hop in place, without rebuilding the page. */
 function setNetStep(i) {
@@ -1810,20 +2092,21 @@ function pageDashboard() {
   const allMine = state.lots.filter((l) => l.owner === c.id);
   const active = allMine.filter((l) => l.status === "active");
   const rank = (a, b) => (b.ready - a.ready) || (b.recommended - a.recommended) || (Engine.gainOf(b, c.id) - Engine.gainOf(a, c.id));
-  const best = v.ready.slice().sort(rank)[0];
+  const guided = ui.tour != null ? v.ready.find((i) => i.sig === "L01>L03>L05") : null;
+  const best = guided || v.ready.slice().sort(rank)[0];
   const openApprovals = state.exchanges.filter((e) => e.status === "proposed" && e.companies.includes(c.id) && !e.approvals[c.id]);
   const liveEx = state.exchanges.filter((e) => ["confirmed", "swatch", "pickup", "delivered"].includes(e.status) && e.companies.includes(c.id));
   const acts = state.activity.filter((a) => a.companies.includes(c.id)).slice(0, 5);
   const top = v.eligible.slice().sort(rank).slice(0, 3);
   const bm = best ? best.members.find((m) => m.company === c.id) : null;
   return `
-  <div class="page-head"><div><h1>${esc(c.name)}</h1><p>${esc(c.kind)}, ${esc(c.city)}. ${c.participating === false ? "You've paused participation, so your lots aren't being matched." : "Here is what your surplus could become."}</p></div>
+  <div class="page-head"><div><h1>Your surplus, at a glance</h1><p>${c.participating === false ? "You've paused participation, so your lots aren't being matched." : `Here is what ${esc(c.name)}'s fabric could become.`}</p></div>
     <div class="row"><button class="btn" id="dash-add" data-act="new-lot">Add a lot</button><button class="btn primary" data-go="matches">View matches</button></div></div>
   <div class="stack">
     ${best ? `<section class="hero" data-tour="hero">
       <div><span class="pill">${best.k === 2 ? "Direct swap available" : `${best.k}-way exchange`}</span>
         <h2>${esc(bm.lotName)} could become ${esc(bm.recvName)}</h2>
-        <p>${best.k > 2 ? `No direct partner is needed: ${best.k} companies each send one lot and receive one they asked for.` : "You and one other company each want what the other holds."} Your estimated gain: <b style="color:#fff">${signed(Engine.gainOf(best, c.id))}</b>.</p>
+        <p>${best.k > 2 ? `No direct partner is needed: ${best.k} companies each send one lot and receive one they asked for.` : "You and one other company each want what the other holds."} Your estimated gain: <b style="color:#fff;white-space:nowrap">${signed(Engine.gainOf(best, c.id))}</b>.</p>
         <div class="row" style="margin-top:14px"><button class="btn" data-act="open-ex" data-sig="${esc(best.sig)}">See who sends what</button></div></div>
       <div class="graph" data-graph="${esc(best.sig)}" data-tone="dark" data-size="compact" data-h="230"></div>
     </section>` : `<section class="card" data-tour="hero"><h2>No exchange ready yet</h2><p class="muted" style="margin-top:6px">${v.belowMin.length ? `${plural(v.belowMin.length, "option")} would work on paper but falls below someone's minimum gain. See Exchange Matches.` : `Nothing currently matches on both fabric and economics for ${esc(c.name)}.`} Widen what you'd accept, or add a lot another company has asked for.</p>
@@ -2065,6 +2348,14 @@ function matchesSummary() {
         <p class="small muted" style="margin-top:8px">${placed.length > 1 ? `Your company is in ${placed.length} exchanges at once, each with a different lot.` : "A company can join several exchanges at once. Each lot goes to only one."}</p>
       </section>`;
 }
+const capped = (arr, key) => {
+  const list = arr.slice(0, ui.listCap[key]);
+  // The guided exchange stays in view during the demonstration.
+  const g = arr.find((i) => i.sig === "L01>L03>L05");
+  if (ui.tour != null && g && !list.includes(g)) list[list.length - 1] = g;
+  return list;
+};
+const moreBtn = (arr, key) => (arr.length > ui.listCap[key] ? `<button class="btn" id="more-${key}" data-act="list-more" data-key="${key}" style="align-self:center">Show ${Math.min(12, arr.length - ui.listCap[key])} more of ${arr.length - ui.listCap[key]}</button>` : "");
 function matchesList() {
   const c = me(), s = state.settings, v = Engine.companyView(state, M, c.id);
   const scope = ui.matchScope, k = ui.matchK;
@@ -2085,9 +2376,9 @@ function matchesList() {
       ${M.audit.pass ? `<span class="pill ok" title="Separate from the optimality status above">✓ Rechecked: each lot used once, every company clears its minimum</span>` : `<span class="pill bad">Recheck failed: ${esc(M.audit.violations[0])}</span>`}
     </div>
     <h2 style="margin-top:6px">Ready to propose</h2>
-    ${list.length ? list.map((i) => exchangeCard(i, c.id, { tour: i.sig === "L01>L03>L05" ? "guided-card" : null })).join("") : `<div class="empty"><h3>Nothing ready at this setting</h3><p class="small">Try a larger exchange size, widen your sourcing needs, or add a lot from My Inventory.</p></div>`}
-    ${below.filter(inK).length ? `<details class="card flat" open data-tour="below"><summary>Works on paper, but below someone's minimum (${below.filter(inK).length})</summary><p class="small muted">These pass the economics, but at least one company has said it needs a bigger gain. They aren't recommended. You can still open them, and a company could lower its minimum.</p><div class="stack" style="gap:10px;margin-top:10px">${below.filter(inK).sort(rank).map((i) => exchangeCard(i, c.id)).join("")}</div></details>` : ""}
-    ${blocked.filter(inK).length ? `<details class="card flat"><summary>Right fabric, wrong economics (${blocked.filter(inK).length})</summary><p class="small muted">The fabrics match every step of the way, but at least one company would lose out under the current rule. These aren't offered.</p><div class="stack" style="gap:10px;margin-top:10px">${blocked.filter(inK).map((i) => exchangeCard(i, c.id)).join("")}</div></details>` : ""}
+    ${list.length ? capped(list, "ready").map((i) => exchangeCard(i, c.id, { tour: i.sig === "L01>L03>L05" ? "guided-card" : null })).join("") + moreBtn(list, "ready") : `<div class="empty"><h3>Nothing ready at this setting</h3><p class="small">Try a larger exchange size, widen your sourcing needs, or add a lot from My Inventory.</p></div>`}
+    ${below.filter(inK).length ? `<details class="card flat" open data-tour="below"><summary>Works on paper, but below someone's minimum (${below.filter(inK).length})</summary><p class="small muted">These pass the economics, but at least one company has said it needs a bigger gain. They aren't recommended. You can still open them, and a company could lower its minimum.</p><div class="stack" style="gap:10px;margin-top:10px">${capped(below.filter(inK).sort(rank), "below").map((i) => exchangeCard(i, c.id)).join("")}${moreBtn(below.filter(inK), "below")}</div></details>` : ""}
+    ${blocked.filter(inK).length ? `<details class="card flat"><summary>Right fabric, wrong economics (${blocked.filter(inK).length})</summary><p class="small muted">The fabrics match every step of the way, but at least one company would lose out under the current rule. These aren't offered.</p><div class="stack" style="gap:10px;margin-top:10px">${capped(blocked.filter(inK), "blocked").map((i) => exchangeCard(i, c.id)).join("")}${moreBtn(blocked.filter(inK), "blocked")}</div></details>` : ""}
     ${declined.length ? `<details class="card flat"><summary>Declined (${declined.length})</summary><div class="stack" style="gap:8px;margin-top:8px">${declined.map((i) => `<div class="between small"><span>${esc(i.members.map((m) => m.lotName).join(" → "))}</span><button class="btn ghost sm" id="reopen-${esc(i.sig)}" data-act="reopen" data-sig="${esc(i.sig)}">Allow again</button></div>`).join("")}</div></details>` : ""}`;
 }
 function pageMatches() {
@@ -2247,7 +2538,7 @@ function pageHow() {
   <div class="stack">
     <section class="card"><h2>Two kinds of numbers. Don't mix them.</h2><p class="small muted" style="margin:3px 0 10px">Neither is evidence from a real market.</p>
       ${t(["", "This prototype's demo results", "The original research findings"], [
-        ["<b>Source</b>", "Ten fictional companies and twenty made-up lots, written so the mechanism is easy to see", "A separate simulation: 60 firms with randomly generated acceptance and values, 40 repetitions"],
+        ["<b>Source</b>", `${state.companies.length} fictional companies and ${state.lots.length} made-up lots in this browser, written so the mechanism is easy to see`, "A separate simulation: 60 firms with randomly generated acceptance and values, 40 repetitions"],
         ["<b>Purpose</b>", "To show how the exchange works from a company's seat", "To compare mechanisms under stated assumptions"],
         ["<b>Example</b>", "Lots moved in this demo: see What multi-way adds on Exchange Matches", "Lots moved: 5.1% direct swaps, 8.7% up to 3-way, 10.3% up to 4-way, 44.2% frictionless price market"],
         ["<b>What it can't show</b>", "How often real fabrics match, or whether companies would join. The demo data was written to contain good examples", "Real market performance. Results hold only under its assumptions, and were not measured with real firms"],
@@ -2366,7 +2657,7 @@ function parseHash() {
 }
 function setHash(h) { try { history.replaceState(null, "", "#" + h); } catch (e) { /* non-navigable origin */ } }
 function go(page, sig) {
-  ui.page = page; ui.sig = sig || null;
+  ui.page = page; ui.sig = sig || null; ui.coOpen = false; ui.demoOpen = false;
   setHash(page === "exchange" ? "exchange/" + encodeURIComponent(sig) : page);
   render();
   window.scrollTo(0, 0);
@@ -2395,18 +2686,57 @@ function renderShell() {
   const c = me(), v = Engine.companyView(state, M, c.id);
   const waiting = state.exchanges.filter((e) => e.status === "proposed" && e.companies.includes(c.id) && !e.approvals[c.id]).length;
   const item = (key, label, count) => `<button id="nav-${key}" data-go="${key}" ${ui.page === key || (ui.page === "exchange" && key === "matches") ? 'aria-current="page"' : ""}><span>${label}</span>${count ? `<span class="count">${count}</span>` : ""}</button>`;
-  $("#side").innerHTML = `
-    <div class="side-top">
-      <div class="brand"><svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11" fill="none" stroke="#1f4d3a" stroke-width="3.5"/><path d="M16 5a11 11 0 0 1 9.5 16.5" fill="none" stroke="#b0603a" stroke-width="3.5" stroke-linecap="round"/></svg><b>Reweft</b></div>
-      <div class="switcher"><label for="co-switch">Viewing as</label><select id="co-switch" data-tour="switcher">${state.companies.map((x) => `<option value="${x.id}" ${x.id === c.id ? "selected" : ""}>${esc(x.name)}</option>`).join("")}</select></div>
-    </div>
-    <nav class="nav" aria-label="Main">
-      ${item("dashboard", "Dashboard")}${item("inventory", "My Inventory", state.lots.filter((l) => l.owner === c.id && l.status === "active").length)}${item("preferences", "My Preferences")}${item("marketplace", "Marketplace")}${item("matches", "Exchange Matches", v.ready.length)}${item("activity", "Activity", waiting)}
-      <div class="nav-sep"></div>${item("how", "How it works")}
-    </nav>
-    <div class="side-foot"><button class="btn sm" id="tour-start" style="width:100%;margin-bottom:6px" data-act="tour-start">See a 3-way exchange</button>
-      <button class="btn ghost sm" id="welcome-open" style="width:100%;margin-bottom:6px" data-act="welcome-open">What is Reweft?</button>
-      Fictional demo companies. Edits stay in this browser. <button id="reset-btn" data-act="reset">Reset demo</button></div>`;
+  $("#top-row").innerHTML = `
+    <div class="top-left"><button class="link-btn" id="tour-start" data-act="tour-start">See a 3-way exchange</button></div>
+    <button class="brand" id="brand-home" data-go="dashboard" aria-label="Reweft, go to dashboard"><svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11" fill="none" stroke="#1f4d3a" stroke-width="3"/><path d="M16 5a11 11 0 0 1 9.5 16.5" fill="none" stroke="#b0603a" stroke-width="3" stroke-linecap="round"/></svg><b>Reweft</b></button>
+    <div class="top-right"><button class="link-btn ${ui.page === "how" ? "on" : ""}" id="nav-how" data-go="how" aria-label="How it works"><span class="q" aria-hidden="true">?</span>How it works</button>
+      <div class="menu-wrap"><button class="link-btn" id="demo-btn" data-act="demo-toggle" aria-haspopup="menu" aria-expanded="${ui.demoOpen}">Demo<span class="chev" aria-hidden="true"></span></button>
+      ${ui.demoOpen ? `<div class="menu" role="menu" id="demo-menu">
+        <button role="menuitem" id="menu-tour" data-act="tour-start">See a 3-way exchange</button>
+        <button role="menuitem" id="welcome-open" data-act="welcome-open">What is Reweft?</button>
+        ${state.sampleAvailable ? `<button role="menuitem" id="menu-sample" data-act="sample-merge">Add the larger sample inventory</button>` : ""}
+        <button role="menuitem" id="reset-btn" data-act="reset">Reset to original sample data</button>
+      </div>` : ""}</div></div>`;
+  $("#nav-row").innerHTML = `<div class="nav-inner">
+      ${item("dashboard", "Dashboard")}${item("marketplace", "Marketplace")}${item("inventory", "My Inventory", state.lots.filter((l) => l.owner === c.id && l.status === "active").length)}${item("preferences", "My Preferences")}${item("matches", "Exchange Matches", v.ready.length)}${item("activity", "Activity", waiting)}
+    </div>`;
+  const row = $("#nav-row"), cur = $('#nav-row [aria-current="page"]');
+  if (cur && row.scrollWidth > row.clientWidth) row.scrollLeft = cur.offsetLeft - (row.clientWidth - cur.offsetWidth) / 2;
+  renderContext();
+}
+function renderContext() {
+  const c = me();
+  const offer = state.sampleAvailable && !state.sampleDismissed;
+  $("#context").innerHTML = `
+    ${offer ? `<div class="sample-offer" role="status"><div><b>A larger sample inventory is available.</b> Adding it brings in more fictional lots and sourcing needs. Your own lots, edits and preferences stay exactly as they are.</div><div class="row"><button class="btn sm primary" id="offer-add" data-act="sample-merge">Add sample lots</button><button class="btn sm" id="offer-reset" data-act="reset">Start from fresh sample</button><button class="btn ghost sm" id="offer-later" data-act="sample-later">Not now</button></div></div>` : ""}
+    <div class="context-row"><span class="eyebrow">Demo workspace</span>
+      <div class="co-select ${ui.coOpen ? "open" : ""}">
+        <button class="co-btn" id="co-btn" data-act="co-toggle" aria-haspopup="listbox" aria-expanded="${ui.coOpen}" aria-label="Viewing as ${esc(c.name)}. Switch company" data-tour="switcher">
+          ${brandMark(c, 44)}<span class="co-text"><span class="co-name">${esc(c.name)}</span><span class="co-meta">${esc(c.kind)} · ${esc(c.city)}</span></span><span class="chev" aria-hidden="true"></span>
+        </button>
+        ${ui.coOpen ? `<div class="co-panel" id="co-panel" role="listbox" aria-label="Switch company"><div class="co-panel-head">Switch company<span>All fictional</span></div>
+          ${state.companies.map((x) => {
+            const sel = x.id === c.id;
+            const n = state.lots.filter((l) => l.owner === x.id && l.status === "active").length;
+            return `<button class="co-opt ${sel ? "on" : ""}" id="co-opt-${x.id}" role="option" aria-selected="${sel}" data-act="co-pick" data-co="${x.id}">${brandMark(x, 38)}<span class="co-text"><span class="co-name">${esc(x.name)}</span><span class="co-meta">${esc(x.kind)} · ${esc(x.city)} · ${plural(n, "lot")}</span></span>${sel ? `<span class="co-check" aria-hidden="true">✓</span>` : ""}</button>`;
+          }).join("")}</div>` : ""}
+      </div></div>`;
+}
+function switchCompany(id) {
+  const changed = id !== state.current;
+  state.current = id;
+  saveState();
+  netState.sel = null; netState.step = null;
+  ui.coOpen = false;
+  ui.listCap = { ready: 12, below: 6, blocked: 6 };
+  render();
+  const btn = $("#co-btn");
+  if (btn) btn.focus({ preventScroll: true });
+  if (changed) {
+    const p = $("#page");
+    p.classList.remove("switching"); void p.offsetWidth; p.classList.add("switching");
+    toast(`Now viewing as ${me().name}.`);
+  }
 }
 
 /* ---- Drawer ---- */
@@ -2606,12 +2936,22 @@ const ACT = {
   },
   reopen: (el) => { delete state.declined[el.dataset.sig]; commit("This exchange can be offered again"); },
   "run-checks": () => { ui.checks = Checks.run(); render(); },
-  reset: () => openDrawer({ type: "confirm", title: "Reset the demo?", text: "This restores the original fictional companies and lots, and removes your edits, photos and activity from this browser.", yes: "Reset demo", danger: true, run: resetDemo }),
+  reset: () => { ui.demoOpen = false; renderShell(); openDrawer({ type: "confirm", title: "Reset to the original sample data?", text: "This restores the fictional companies and the full sample inventory, and permanently removes your own lots, edits, photos and activity from this browser.", yes: "Reset and replace my data", danger: true, run: resetDemo }); },
   "toggle-part": (el) => { me().participating = el.checked; commit(el.checked ? "Back in matching" : "Participation paused", { soft: softPreferences }); },
-  "welcome-open": () => openDrawer({ type: "welcome" }),
+  "welcome-open": () => { ui.demoOpen = false; renderShell(); openDrawer({ type: "welcome" }); },
   "welcome-go": () => { markWelcomed(); ui.drawer = null; renderOverlay(); startTour("quick"); },
   "welcome-skip": () => { markWelcomed(); closeDrawer(); const m = $("#main"); if (m) m.focus({ preventScroll: true }); },
-  "tour-start": () => startTour("quick"),
+  "co-toggle": () => { ui.coOpen = !ui.coOpen; ui.demoOpen = false; renderShell(); const t = ui.coOpen ? $("#co-opt-" + state.current) : $("#co-btn"); if (t) t.focus({ preventScroll: true }); },
+  "co-pick": (el) => switchCompany(el.dataset.co),
+  "demo-toggle": () => { ui.demoOpen = !ui.demoOpen; ui.coOpen = false; renderShell(); const t = ui.demoOpen ? $("#demo-menu button") : $("#demo-btn"); if (t) t.focus({ preventScroll: true }); },
+  "sample-merge": () => {
+    ui.demoOpen = false;
+    const a = Engine.mergeSample(state, Seed.fresh());
+    commit(`Added ${plural(a.lots, "sample lot")} and ${plural(a.needs, "sourcing need")}. Your own lots and edits were not changed`);
+  },
+  "sample-later": () => { state.sampleDismissed = true; saveState(); renderContext(); toast("You can add it any time from the Demo menu."); },
+  "list-more": (el) => { ui.listCap[el.dataset.key] += 12; render(); },
+  "tour-start": () => { ui.demoOpen = false; startTour("quick"); },
   "tour-full": () => startTour("full"),
   "tour-next": () => tourNext(),
   "tour-back": () => tourGo(ui.tour - 1),
@@ -2622,7 +2962,7 @@ function markWelcomed() { state.welcomed = true; saveState(); }
 function resetDemo(silent) {
   state = Seed.fresh();
   state.welcomed = true;
-  ui.matchK = "all"; ui.matchScope = "mine"; ui.invFilter = "active"; ui.lastAdded = null;
+  ui.matchK = "all"; ui.matchScope = "mine"; ui.invFilter = "active"; ui.lastAdded = null; ui.coOpen = false; ui.demoOpen = false; ui.listCap = { ready: 12, below: 6, blocked: 6 };
   netState.mode = "set"; netState.sel = null; netState.step = null;
   M = Engine.computeMarket(state);
   saveState();
@@ -2640,6 +2980,9 @@ function approveAs(sig, cid) {
 
 /* ---- Global events ---- */
 document.addEventListener("click", (e) => {
+  // Clicking elsewhere closes the company panel and the demo menu.
+  if (ui.coOpen && !e.target.closest(".co-select")) { ui.coOpen = false; renderContext(); }
+  if (ui.demoOpen && !e.target.closest(".menu-wrap")) { ui.demoOpen = false; renderShell(); }
   const actEl = e.target.closest("[data-act]");
   if (actEl && actEl.type !== "checkbox") {
     const fn = ACT[actEl.dataset.act];
@@ -2668,11 +3011,6 @@ document.addEventListener("input", (e) => { if (e.target.dataset && e.target.dat
 
 document.addEventListener("change", (e) => {
   const el = e.target;
-  if (el.id === "co-switch") {
-    state.current = el.value; saveState(); netState.sel = null; netState.step = null;
-    toast(`Now viewing as ${me().name}.`); render();
-    return;
-  }
   if (el.dataset.act === "toggle-part") return ACT["toggle-part"](el);
   if (el.dataset.mp) return; // handled on input
   if (el.dataset.pf) {
@@ -2698,6 +3036,24 @@ document.addEventListener("change", (e) => {
   }
 });
 document.addEventListener("keydown", (e) => {
+  // Company panel and demo menu: arrow keys move, Escape closes and returns focus.
+  if (ui.coOpen || ui.demoOpen) {
+    const box = ui.coOpen ? "#co-panel .co-opt" : "#demo-menu button";
+    const items = $$(box), at = items.indexOf(document.activeElement);
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      if (items.length) items[(at + (e.key === "ArrowDown" ? 1 : -1) + items.length) % items.length].focus();
+      return;
+    }
+    if (e.key === "Home" || e.key === "End") { e.preventDefault(); if (items.length) items[e.key === "Home" ? 0 : items.length - 1].focus(); return; }
+    if (e.key === "Escape" || e.key === "Tab") {
+      if (e.key === "Escape") e.preventDefault();
+      const wasCo = ui.coOpen;
+      ui.coOpen = false; ui.demoOpen = false; renderShell();
+      const b = $(wasCo ? "#co-btn" : "#demo-btn"); if (b && e.key === "Escape") b.focus({ preventScroll: true });
+      return;
+    }
+  }
   if (e.key === "Escape") {
     if (ui.drawer) {
       if (ui.drawer.type === "welcome") { ACT["welcome-skip"](); return; }
@@ -2767,7 +3123,7 @@ const TOURS = {
     { title: "A denim lot with no direct partner", text: "You are Namsan Atelier. You hold 420 m of indigo denim and want fluid viscose. The company with the viscose doesn't want denim, so a normal two-way swap goes nowhere.", go: () => go("dashboard"), target: "hero" },
     { title: "The stuck lot in your inventory", text: "This lot shows an option marked “multi-way only”. No direct swap works for it, but a longer loop does.", go: () => go("inventory"), target: "L01" },
     { title: "See the loops", text: "Each colored loop is one exchange. Select a company, a loop or a fabric to follow who sends what to whom.", go: () => { selectGuided(); go("matches"); }, target: "network" },
-    { title: "What multi-way adds", text: "The same demo lots and needs. Direct swaps move 2 lots here, and allowing 3- and 4-way exchanges moves 9. These are fictional numbers that illustrate the mechanism, not market evidence.", go: () => go("matches"), target: "compare" },
+    { title: "What multi-way adds", text: () => `The same demo lots and needs. Direct swaps move ${M.packs[2].selected.reduce((a, c) => a + c.k, 0)} lots here, and allowing 3- and 4-way exchanges moves ${M.packs[4].selected.reduce((a, c) => a + c.k, 0)}. These are fictional numbers that illustrate the mechanism, not market evidence.`, go: () => go("matches"), target: "compare" },
     { title: "Your best option is a 3-way loop", text: "Calculated live from specifications, needs and costs. Open it to see exactly who sends what.", go: () => go("matches"), target: "guided-card" },
     { title: "Who sends what to whom", text: "Namsan sends denim to Palgong. Palgong sends jersey to Mudeung. Mudeung sends viscose to Namsan. Each company gets something it asked for.", go: () => go("exchange", G), target: "graph" },
     { title: "Why a direct swap fails", text: "Each pair wants something in only one direction. The reasons come directly from each company's stated needs.", go: () => go("exchange", G), target: "why" },
@@ -2811,7 +3167,7 @@ function renderTour() {
   if (ui.tour == null) { host.innerHTML = ""; return; }
   const list = currentTour(), s = list[ui.tour];
   host.innerHTML = `<div class="tour" role="dialog" aria-label="Guided demonstration"><div class="bar"><i style="width:${((ui.tour + 1) / list.length) * 100}%"></i></div>
-    <div class="small" style="color:#a9c9b6">Step ${ui.tour + 1} of ${list.length}</div><h3>${esc(s.title)}</h3><p>${esc(s.text)}</p>
+    <div class="small" style="color:#a9c9b6">Step ${ui.tour + 1} of ${list.length}</div><h3>${esc(s.title)}</h3><p>${esc(typeof s.text === "function" ? s.text() : s.text)}</p>
     <div class="between" style="margin-top:12px"><button class="btn ghost sm" id="tour-exit" data-act="tour-end">${s.last ? "Close" : "Exit"}</button><div class="row">${ui.tour > 0 && !s.next && !list[ui.tour - 1].next ? `<button class="btn ghost sm" id="tour-back" data-act="tour-back">Back</button>` : ""}${s.alt ? `<button class="btn sm" id="tour-alt" data-act="tour-alt">${esc(s.alt.label)}</button>` : ""}<button class="btn sm" id="tour-next" data-act="tour-next">${esc(s.nextLabel || (s.last ? "Finish" : "Next"))}</button></div></div></div>`;
   if (s.target) {
     const el = document.querySelector(`[data-tour="${CSS.escape(s.target)}"]`);
